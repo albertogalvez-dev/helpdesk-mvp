@@ -14,28 +14,28 @@ interface TicketItem {
 }
 
 function StatusBadge({ status }: { status: string }) {
-    const styles: Record<string, string> = {
-        NEW: "bg-lime-100 text-lime-800",
-        OPEN: "bg-yellow-100 text-yellow-800",
-        PENDING: "bg-orange-100 text-orange-800",
-        RESOLVED: "bg-green-100 text-green-800",
-        CLOSED: "bg-gray-100 text-gray-600",
+    const classes: Record<string, string> = {
+        NEW: "badge-new",
+        OPEN: "badge-open",
+        PENDING: "badge-pending",
+        RESOLVED: "badge-resolved",
+        CLOSED: "badge-closed",
     };
     return (
-        <span className={`px-2 py-1 text-xs font-medium rounded-full ${styles[status] || "bg-gray-100"}`}>
+        <span className={`px-2.5 py-0.5 text-xs font-medium rounded-full ${classes[status] || "badge-closed"}`}>
             {status}
         </span>
     );
 }
 
 function PriorityIndicator({ priority }: { priority: string }) {
-    const colors: Record<string, string> = {
-        LOW: "text-gray-400",
-        MEDIUM: "text-blue-500",
-        HIGH: "text-orange-500",
-        URGENT: "text-red-500",
+    const classes: Record<string, string> = {
+        LOW: "priority-low",
+        MEDIUM: "priority-medium",
+        HIGH: "priority-high",
+        URGENT: "priority-urgent",
     };
-    return <span className={`font-medium ${colors[priority] || ""}`}>{priority}</span>;
+    return <span className={`text-sm ${classes[priority] || ""}`}>{priority}</span>;
 }
 
 export function PortalTicketList() {

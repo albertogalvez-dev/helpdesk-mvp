@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { useState } from "react";
+import { Headphones } from "lucide-react";
 
 const loginSchema = z.object({
     email: z.string().email("Please enter a valid email"),
@@ -39,37 +40,31 @@ export function LoginPage() {
         setError("");
 
         try {
-            // 1. Login - Backend expects JSON with {email, password}
             const loginRes = await api.post("/auth/login", {
                 email: data.email,
                 password: data.password,
             });
             debugLog("login response status", loginRes.status);
 
-            // Backend returns APIResponse envelope: { data: { access_token, ... }, error: null }
             const token = loginRes.data?.data?.access_token;
             if (!token) {
                 throw new Error("No access_token in response");
             }
             debugLog("token received", token.substring(0, 20) + "...");
 
-            // 2. Get user profile with the new token
             const meRes = await api.get("/auth/me", {
                 headers: { Authorization: `Bearer ${token}` },
             });
             debugLog("me response", meRes.data);
 
-            // meRes.data is also wrapped in APIResponse: { data: { user, workspace } }
             const userData = meRes.data?.data?.user;
             if (!userData) {
                 throw new Error("No user data in /auth/me response");
             }
             debugLog("user", { role: userData.role, email: userData.email });
 
-            // 3. Save auth state
             setAuth(token, userData);
 
-            // 4. Redirect by role
             const role = userData.role?.toLowerCase();
             if (role === "admin" || role === "agent") {
                 debugLog("redirecting to /agent/inbox");
@@ -80,7 +75,6 @@ export function LoginPage() {
             }
         } catch (err: any) {
             debugLog("login error", err);
-            // Extract meaningful error message
             const apiError = err.response?.data?.error?.message;
             const statusCode = err.response?.status;
 
@@ -99,16 +93,37 @@ export function LoginPage() {
     };
 
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-            <Card className="w-full max-w-md shadow-2xl border-0 bg-white/95 backdrop-blur">
+        <div
+            className="flex items-center justify-center min-h-screen"
+            style={{
+                background: 'linear-gradient(135deg, var(--dark-tertiary) 0%, var(--dark-primary) 100%)'
+            }}
+        >
+            <Card
+                className="w-full max-w-md border-0"
+                style={{
+                    boxShadow: 'var(--shadow-lg)',
+                    borderRadius: 'var(--radius-lg)',
+                    background: 'var(--bg-glass)',
+                    backdropFilter: 'blur(8px)'
+                }}
+            >
                 <CardHeader className="space-y-1 pb-4">
                     <div className="flex justify-center mb-4">
-                        <div className="h-12 w-12 rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 flex items-center justify-center shadow-lg">
-                            <span className="text-white font-bold text-xl">H</span>
+                        <div
+                            className="h-14 w-14 rounded-xl flex items-center justify-center"
+                            style={{
+                                background: 'var(--primary-green)',
+                                boxShadow: 'var(--shadow-md)'
+                            }}
+                        >
+                            <Headphones className="h-7 w-7" style={{ color: 'var(--dark-primary)' }} />
                         </div>
                     </div>
                     <CardTitle className="text-2xl text-center font-bold">Welcome Back</CardTitle>
-                    <p className="text-center text-muted-foreground text-sm">Sign in to your Helpdesk account</p>
+                    <p className="text-center text-sm" style={{ color: 'var(--text-muted)' }}>
+                        Sign in to your Helpdesk account
+                    </p>
                 </CardHeader>
                 <CardContent>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -120,6 +135,7 @@ export function LoginPage() {
                                 placeholder="admin@acme.com"
                                 autoComplete="email"
                                 disabled={isLoading}
+                                style={{ borderRadius: 'var(--radius-sm)' }}
                             />
                             {form.formState.errors.email && (
                                 <p className="text-destructive text-xs">{form.formState.errors.email.message}</p>
@@ -132,6 +148,7 @@ export function LoginPage() {
                                 type="password"
                                 autoComplete="current-password"
                                 disabled={isLoading}
+                                style={{ borderRadius: 'var(--radius-sm)' }}
                             />
                             {form.formState.errors.password && (
                                 <p className="text-destructive text-xs">{form.formState.errors.password.message}</p>
@@ -139,15 +156,29 @@ export function LoginPage() {
                         </div>
 
                         {error && (
-                            <div className="bg-destructive/10 border border-destructive/30 text-destructive text-sm p-3 rounded-md text-center">
+                            <div
+                                className="text-sm p-3 rounded-md text-center"
+                                style={{
+                                    background: 'rgba(239, 68, 68, 0.1)',
+                                    border: '1px solid rgba(239, 68, 68, 0.3)',
+                                    color: '#dc2626',
+                                    borderRadius: 'var(--radius-sm)'
+                                }}
+                            >
                                 {error}
                             </div>
                         )}
 
                         <Button
                             type="submit"
-                            className="w-full bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white font-semibold py-2.5"
+                            className="w-full font-semibold py-2.5 transition-all"
                             disabled={isLoading}
+                            style={{
+                                background: 'var(--primary-green)',
+                                color: 'var(--dark-primary)',
+                                borderRadius: 'var(--radius-md)',
+                                boxShadow: isLoading ? 'none' : 'var(--shadow-sm)'
+                            }}
                         >
                             {isLoading ? (
                                 <span className="flex items-center gap-2">
@@ -160,9 +191,13 @@ export function LoginPage() {
                             ) : "Sign In"}
                         </Button>
 
-                        <div className="text-center text-xs text-muted-foreground mt-4 pt-4 border-t">
-                            <p className="mb-1">Demo Credentials:</p>
-                            <code className="bg-gray-100 px-2 py-1 rounded text-xs">admin@acme.com / password123</code>
+                        <div className="text-center text-xs mt-4 pt-4 border-t" style={{ color: 'var(--text-muted)' }}>
+                            <p className="mb-2">Demo Credentials:</p>
+                            <div className="space-y-1">
+                                <code className="block px-2 py-1 rounded text-xs" style={{ background: 'var(--bg-overlay-light)' }}>
+                                    admin@acme.com / password123
+                                </code>
+                            </div>
                         </div>
                     </form>
                 </CardContent>
