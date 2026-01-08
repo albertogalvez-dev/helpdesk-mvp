@@ -1,87 +1,74 @@
-# Helpdesk Product Demo Walkthrough
+# Helpdesk MVP - Demo Walkthrough
 
-This guide helps you present the Helpdesk API as a polished product using local seed data and manual automation.
+## Quick Start
 
-## 1. Setup (Run this first)
-
+### 1. Start Backend (Docker)
 ```bash
-# Start the stack (API + DB + Redis + Worker)
-make up
-
-# Wait 10s for DB to be ready, then run migrations
-make migrate
-
-# Populate with "Acme IT Services" realistic data
-make seed
-
-# Start Frontend (in a new terminal)
-cd apps/web && npm run dev
-# Open UI: http://127.0.0.1:5173
+cd infra
+docker compose up -d
 ```
 
-## 2. The Narrative (Demo Script)
+### 2. Start Frontend
+```bash
+cd apps/web
+npm install && npm run dev
+```
 
-### Scenario A: The "Morning Check" (Admin/Agent View)
-**Goal**: Show volume of tickets and "Urgent" issues from overnight.
+### 3. Access
+- **Frontend:** http://localhost:5173
+- **API Docs:** http://localhost:18000/docs
 
-1.  **Login as Admin**:
-    - Open `http://127.0.0.1:5173/login`
-    - Credentials: `admin@acme.com` / `password123`
+---
 
-2.  **View Dashboard / Ticket List**:
-    - Show `GET /api/v1/tickets?sort_by=priority&sort_order=desc` (API) or check Inbox UI.
-    - *See*: Tickets sorted by Priority. Look for "VPN Down" (Urgent).
+## Test Credentials
 
-3.  **Check Weekly Report** (API Demo):
-    - `GET /api/v1/reports/weekly`
-    - *See*: Stats for "Acme IT Services" (Created, Resolved, Breaches).
+| Role | Email | Password | Redirect |
+|------|-------|----------|----------|
+| **Admin** | admin@acme.com | password123 | /agent/inbox |
+| **Agent** | agent@acme.com | password123 | /agent/inbox |
+| **Customer** | customer@acme.com | password123 | /portal/tickets |
 
-### Scenario B: The "SLA Breach" (Automation)
-**Goal**: Show how the system auto-escalates neglected tickets.
+---
 
-1.  **Simulate Time/Inaction**: 
-    - (The seed script already created some "older" open tickets).
-    - Or create a new ticket and manually update DB timestamp (advanced).
-    - *Easier*: Just run the escalation job to catch any pending breaches from seed.
+## Demo Flow
 
-2.  **Trigger Escalation Manually**:
-    ```bash
-    make run-job JOB=sla_escalation
-    ```
-    - Check logs or response: "SLA Escalation Job executed".
+### 1. Customer Creates Ticket
+1. Login as customer
+2. Click "New Ticket"
+3. Fill subject: "Printer not working"
+4. Add description and submit
+5. See ticket in "My Tickets"
 
-3.  **Verify Impact**:
-    - List tickets again. Look for tickets that moved to `priority: HIGH` or `URGENT` automatically.
-    - Check UI for updated priority.
+### 2. Agent Responds
+1. Login as admin/agent
+2. Open ticket from Inbox
+3. View requester/company info (right panel)
+4. Add reply in conversation tab
+5. Change status to "OPEN"
 
-### Scenario C: The "Resolution"
-**Goal**: Agent fixes issue and closes loop in UI.
+### 3. Admin Panel
+1. Login as admin
+2. Click Admin → Users (view team)
+3. Click Admin → Workspace (company settings)
+4. Click Admin → SLAs (manage policies)
 
-1.  **Pick a Ticket (e.g., VPN Down)**.
-2.  **Assign to Self (Bob Agent)**:
-    - Click "Assign to me" or use API.
-3.  **Add Internal Note**:
-    - "Customer called, verified fix."
-4.  **Resolve**:
-    - Change Status to "RESOLVED".
+---
 
-### Scenario D: Auto-Close (Maintenance)
-**Goal**: System cleaner.
+## Features
 
-1.  **Run Auto-Close Job**:
-    ```bash
-    make run-job JOB=auto_close
-    ```
-    - *Effect*: Any RESOLVED ticket older than 7 days (from seed) becomes CLOSED.
+### Agent Console
+- **Inbox**: Ticket list with filters, search, pagination
+- **Ticket Detail**: 3-column layout (metadata, conversation, requester info)
+- **Reports**: Weekly stats and leaderboard
+- **Admin**: User management, workspace settings, SLA policies
 
-## 3. Reference Data (from Seed)
+### Customer Portal
+- **My Tickets**: View all submitted tickets
+- **New Ticket**: Create support request
+- **Ticket Detail**: View conversation and reply
 
-- **Admin**: `admin@acme.com` / `password123`
-- **Agents**: `bob@acme.com`, `carol@acme.com`
-- **Customers**: `cust1@client.com` ... `cust5@client.com`
-- **Workspace**: Acme IT Services
-
-## 4. Troubleshooting
-
-- **Reset**: To start fresh, `make down`, `docker volume prune` (careful!), then Step 1.
-- **Logs**: `make logs` to see worker processing jobs.
+### Design System
+- Lime primary color (#d1f470)
+- Dark sidebar theme
+- Consistent badges and cards
+- Inter typography
