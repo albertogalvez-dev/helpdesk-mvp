@@ -1,0 +1,58 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.14, pytest-9.0.2, pluggy-1.6.0 -- /usr/local/bin/python3.11
+cachedir: .pytest_cache
+rootdir: /app
+configfile: pyproject.toml
+plugins: anyio-4.12.1
+collecting ... collected 6 items
+
+tests/test_tickets.py::test_customer_can_create_and_list_own_tickets PASSED [ 16%]
+tests/test_tickets.py::test_customer_cannot_access_other_users_ticket PASSED [ 33%]
+tests/test_tickets.py::test_agent_can_list_workspace_tickets PASSED      [ 50%]
+tests/test_tickets.py::test_agent_can_assign_ticket_and_msg FAILED       [ 66%]
+tests/test_tickets.py::test_internal_notes_visibility PASSED             [ 83%]
+tests/test_tickets.py::test_tags_operations PASSED                       [100%]
+
+=================================== FAILURES ===================================
+_____________________ test_agent_can_assign_ticket_and_msg _____________________
+
+client = <starlette.testclient.TestClient object at 0x7bde4eb29190>
+agent_auth_headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Njc4MTIwMDgsInN1YiI6ImNkOWE3MTgzLTJkMjMtNDRmNC1hY2E0LTEzZWQzZWY1ZTkxYiJ9.Sa3Rd1yvRLjn_ET7ljr_12Xdu3kOaUT3S91IIQC_xtA'}
+customer_auth_headers = {'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE3Njc4MTIwMDgsInN1YiI6IjhiZDUxMGEwLTA2MzUtNDliOS1hZGQzLWY2MjQwYzBkODc1YSJ9.YUCIhLs2UfsIT6jlKs9CehttymuHNjK5H34W6wSuyxA'}
+
+    def test_agent_can_assign_ticket_and_msg(client, agent_auth_headers, customer_auth_headers):
+        # Customer creates
+        resp = client.post(
+            "/api/v1/tickets",
+            headers=customer_auth_headers,
+            json={"subject": "Help", "description": "Plz"}
+        )
+        ticket_id = resp.json()["data"]["id"]
+    
+        # Agent assigns to self (need agent ID, but let's assign to None or just check endpoint)
+        # Get current agent ID?
+        me_resp = client.get("/api/v1/auth/me", headers=agent_auth_headers)
+>       agent_id = me_resp.json()["data"]["id"]
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'id'
+
+tests/test_tickets.py:62: KeyError
+---------------------------- Captured stdout setup -----------------------------
+2026-01-07 18:23:27,519 INFO httpx HTTP Request: POST http://testserver/api/v1/auth/register "HTTP/1.1 201 Created"
+2026-01-07 18:23:27,721 INFO httpx HTTP Request: POST http://testserver/api/v1/auth/login "HTTP/1.1 200 OK"
+2026-01-07 18:23:28,115 INFO httpx HTTP Request: POST http://testserver/api/v1/auth/login "HTTP/1.1 200 OK"
+2026-01-07 18:23:28,515 INFO httpx HTTP Request: POST http://testserver/api/v1/auth/login "HTTP/1.1 200 OK"
+------------------------------ Captured log setup ------------------------------
+INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/api/v1/auth/register "HTTP/1.1 201 Created"
+INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/api/v1/auth/login "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/api/v1/auth/login "HTTP/1.1 200 OK"
+INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/api/v1/auth/login "HTTP/1.1 200 OK"
+----------------------------- Captured stdout call -----------------------------
+2026-01-07 18:23:28,529 INFO httpx HTTP Request: POST http://testserver/api/v1/tickets "HTTP/1.1 201 Created"
+2026-01-07 18:23:28,544 INFO httpx HTTP Request: GET http://testserver/api/v1/auth/me "HTTP/1.1 200 OK"
+------------------------------ Captured log call -------------------------------
+INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/api/v1/tickets "HTTP/1.1 201 Created"
+INFO     httpx:_client.py:1025 HTTP Request: GET http://testserver/api/v1/auth/me "HTTP/1.1 200 OK"
+=========================== short test summary info ============================
+FAILED tests/test_tickets.py::test_agent_can_assign_ticket_and_msg - KeyError...
+========================= 1 failed, 5 passed in 7.73s ==========================

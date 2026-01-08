@@ -1,0 +1,12 @@
+ImportError while loading conftest '/app/tests/conftest.py'.
+tests/conftest.py:11: in <module>
+    from app.main import app
+app/main.py:13: in <module>
+    from app.modules.tickets.router import router as tickets_router
+app/modules/tickets/router.py:15: in <module>
+    from app.modules.tickets.service import ticket_service
+app/modules/tickets/service.py:6: in <module>
+    from app.modules.tickets.repo import ticket_repo
+app/modules/tickets/repo.py:8: in <module>
+    from app.modules.tickets.models import Ticket, TicketMessage, InternalNote, Tag, TicketTag, Assignment
+E   ImportError: cannot import name 'Tag' from 'app.modules.tickets.models' (/app/app/modules/tickets/models.py)

@@ -1,0 +1,204 @@
+============================= test session starts ==============================
+platform linux -- Python 3.11.14, pytest-9.0.2, pluggy-1.6.0 -- /usr/local/bin/python3.11
+cachedir: .pytest_cache
+rootdir: /app
+configfile: pyproject.toml
+plugins: anyio-4.12.1
+collecting ... collected 6 items
+
+tests/test_tickets.py::test_customer_can_create_and_list_own_tickets ERROR [ 16%]
+tests/test_tickets.py::test_customer_cannot_access_other_users_ticket ERROR [ 33%]
+tests/test_tickets.py::test_agent_can_list_workspace_tickets ERROR       [ 50%]
+tests/test_tickets.py::test_agent_can_assign_ticket_and_msg ERROR        [ 66%]
+tests/test_tickets.py::test_internal_notes_visibility ERROR              [ 83%]
+tests/test_tickets.py::test_tags_operations ERROR                        [100%]
+
+==================================== ERRORS ====================================
+_______ ERROR at setup of test_customer_can_create_and_list_own_tickets ________
+
+client = <starlette.testclient.TestClient object at 0x789318bef610>
+
+    @pytest.fixture
+    def admin_auth_headers(client):
+        # Register admin (creates workspace)
+        resp = client.post("/api/v1/auth/register", json={
+            "workspace_name": "TestCorp",
+            "admin_email": "admin@test.com",
+            "admin_password": "password",
+            "admin_full_name": "Admin"
+        })
+        # If already exists (due to other tests not cleaning up perfectly or concurrency), try login
+        if resp.status_code == 400:
+            login_resp = client.post("/api/v1/auth/login", json={
+                "email": "admin@test.com",
+                "password": "password"
+            })
+            token = login_resp.json()["data"]["access_token"]
+        else:
+>           token = resp.json()["data"]["access_token"]
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'access_token'
+
+tests/conftest.py:74: KeyError
+---------------------------- Captured stdout setup -----------------------------
+2026-01-07 18:21:25,580 INFO httpx HTTP Request: POST http://testserver/api/v1/auth/register "HTTP/1.1 201 Created"
+------------------------------ Captured log setup ------------------------------
+INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/api/v1/auth/register "HTTP/1.1 201 Created"
+_______ ERROR at setup of test_customer_cannot_access_other_users_ticket _______
+
+client = <starlette.testclient.TestClient object at 0x789318d68790>
+
+    @pytest.fixture
+    def admin_auth_headers(client):
+        # Register admin (creates workspace)
+        resp = client.post("/api/v1/auth/register", json={
+            "workspace_name": "TestCorp",
+            "admin_email": "admin@test.com",
+            "admin_password": "password",
+            "admin_full_name": "Admin"
+        })
+        # If already exists (due to other tests not cleaning up perfectly or concurrency), try login
+        if resp.status_code == 400:
+            login_resp = client.post("/api/v1/auth/login", json={
+                "email": "admin@test.com",
+                "password": "password"
+            })
+            token = login_resp.json()["data"]["access_token"]
+        else:
+>           token = resp.json()["data"]["access_token"]
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'access_token'
+
+tests/conftest.py:74: KeyError
+---------------------------- Captured stdout setup -----------------------------
+2026-01-07 18:21:26,210 INFO httpx HTTP Request: POST http://testserver/api/v1/auth/register "HTTP/1.1 201 Created"
+------------------------------ Captured log setup ------------------------------
+INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/api/v1/auth/register "HTTP/1.1 201 Created"
+___________ ERROR at setup of test_agent_can_list_workspace_tickets ____________
+
+client = <starlette.testclient.TestClient object at 0x78931832b190>
+
+    @pytest.fixture
+    def admin_auth_headers(client):
+        # Register admin (creates workspace)
+        resp = client.post("/api/v1/auth/register", json={
+            "workspace_name": "TestCorp",
+            "admin_email": "admin@test.com",
+            "admin_password": "password",
+            "admin_full_name": "Admin"
+        })
+        # If already exists (due to other tests not cleaning up perfectly or concurrency), try login
+        if resp.status_code == 400:
+            login_resp = client.post("/api/v1/auth/login", json={
+                "email": "admin@test.com",
+                "password": "password"
+            })
+            token = login_resp.json()["data"]["access_token"]
+        else:
+>           token = resp.json()["data"]["access_token"]
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'access_token'
+
+tests/conftest.py:74: KeyError
+---------------------------- Captured stdout setup -----------------------------
+2026-01-07 18:21:26,538 INFO httpx HTTP Request: POST http://testserver/api/v1/auth/register "HTTP/1.1 201 Created"
+------------------------------ Captured log setup ------------------------------
+INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/api/v1/auth/register "HTTP/1.1 201 Created"
+____________ ERROR at setup of test_agent_can_assign_ticket_and_msg ____________
+
+client = <starlette.testclient.TestClient object at 0x789318d24410>
+
+    @pytest.fixture
+    def admin_auth_headers(client):
+        # Register admin (creates workspace)
+        resp = client.post("/api/v1/auth/register", json={
+            "workspace_name": "TestCorp",
+            "admin_email": "admin@test.com",
+            "admin_password": "password",
+            "admin_full_name": "Admin"
+        })
+        # If already exists (due to other tests not cleaning up perfectly or concurrency), try login
+        if resp.status_code == 400:
+            login_resp = client.post("/api/v1/auth/login", json={
+                "email": "admin@test.com",
+                "password": "password"
+            })
+            token = login_resp.json()["data"]["access_token"]
+        else:
+>           token = resp.json()["data"]["access_token"]
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'access_token'
+
+tests/conftest.py:74: KeyError
+---------------------------- Captured stdout setup -----------------------------
+2026-01-07 18:21:26,833 INFO httpx HTTP Request: POST http://testserver/api/v1/auth/register "HTTP/1.1 201 Created"
+------------------------------ Captured log setup ------------------------------
+INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/api/v1/auth/register "HTTP/1.1 201 Created"
+_______________ ERROR at setup of test_internal_notes_visibility _______________
+
+client = <starlette.testclient.TestClient object at 0x789319beb010>
+
+    @pytest.fixture
+    def admin_auth_headers(client):
+        # Register admin (creates workspace)
+        resp = client.post("/api/v1/auth/register", json={
+            "workspace_name": "TestCorp",
+            "admin_email": "admin@test.com",
+            "admin_password": "password",
+            "admin_full_name": "Admin"
+        })
+        # If already exists (due to other tests not cleaning up perfectly or concurrency), try login
+        if resp.status_code == 400:
+            login_resp = client.post("/api/v1/auth/login", json={
+                "email": "admin@test.com",
+                "password": "password"
+            })
+            token = login_resp.json()["data"]["access_token"]
+        else:
+>           token = resp.json()["data"]["access_token"]
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'access_token'
+
+tests/conftest.py:74: KeyError
+---------------------------- Captured stdout setup -----------------------------
+2026-01-07 18:21:27,137 INFO httpx HTTP Request: POST http://testserver/api/v1/auth/register "HTTP/1.1 201 Created"
+------------------------------ Captured log setup ------------------------------
+INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/api/v1/auth/register "HTTP/1.1 201 Created"
+____________________ ERROR at setup of test_tags_operations ____________________
+
+client = <starlette.testclient.TestClient object at 0x789318bfcf90>
+
+    @pytest.fixture
+    def admin_auth_headers(client):
+        # Register admin (creates workspace)
+        resp = client.post("/api/v1/auth/register", json={
+            "workspace_name": "TestCorp",
+            "admin_email": "admin@test.com",
+            "admin_password": "password",
+            "admin_full_name": "Admin"
+        })
+        # If already exists (due to other tests not cleaning up perfectly or concurrency), try login
+        if resp.status_code == 400:
+            login_resp = client.post("/api/v1/auth/login", json={
+                "email": "admin@test.com",
+                "password": "password"
+            })
+            token = login_resp.json()["data"]["access_token"]
+        else:
+>           token = resp.json()["data"]["access_token"]
+                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E           KeyError: 'access_token'
+
+tests/conftest.py:74: KeyError
+---------------------------- Captured stdout setup -----------------------------
+2026-01-07 18:21:27,429 INFO httpx HTTP Request: POST http://testserver/api/v1/auth/register "HTTP/1.1 201 Created"
+------------------------------ Captured log setup ------------------------------
+INFO     httpx:_client.py:1025 HTTP Request: POST http://testserver/api/v1/auth/register "HTTP/1.1 201 Created"
+=========================== short test summary info ============================
+ERROR tests/test_tickets.py::test_customer_can_create_and_list_own_tickets - ...
+ERROR tests/test_tickets.py::test_customer_cannot_access_other_users_ticket
+ERROR tests/test_tickets.py::test_agent_can_list_workspace_tickets - KeyError...
+ERROR tests/test_tickets.py::test_agent_can_assign_ticket_and_msg - KeyError:...
+ERROR tests/test_tickets.py::test_internal_notes_visibility - KeyError: 'acce...
+ERROR tests/test_tickets.py::test_tags_operations - KeyError: 'access_token'
+============================== 6 errors in 2.38s ===============================

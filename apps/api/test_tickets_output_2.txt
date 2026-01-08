@@ -1,0 +1,32 @@
+ImportError while loading conftest '/app/tests/conftest.py'.
+tests/conftest.py:11: in <module>
+    from app.main import app
+app/main.py:14: in <module>
+    from app.modules.tags.router import router as tags_router
+app/modules/tags/router.py:18: in <module>
+    @router.get("", response_model=APIResponse[list[TagResponse]])
+     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/fastapi/routing.py:1063: in decorator
+    self.add_api_route(
+/usr/local/lib/python3.11/site-packages/fastapi/routing.py:1002: in add_api_route
+    route = route_class(
+/usr/local/lib/python3.11/site-packages/fastapi/routing.py:621: in __init__
+    self.dependant = get_dependant(
+/usr/local/lib/python3.11/site-packages/fastapi/dependencies/utils.py:298: in get_dependant
+    sub_dependant = get_dependant(
+/usr/local/lib/python3.11/site-packages/fastapi/dependencies/utils.py:272: in get_dependant
+    endpoint_signature = get_typed_signature(call)
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/fastapi/dependencies/utils.py:214: in get_typed_signature
+    signature = _get_signature(call)
+                ^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/site-packages/fastapi/dependencies/utils.py:203: in _get_signature
+    signature = inspect.signature(call, eval_str=True)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/local/lib/python3.11/inspect.py:3263: in signature
+    return Signature.from_callable(obj, follow_wrapped=follow_wrapped,
+/usr/local/lib/python3.11/inspect.py:3011: in from_callable
+    return _signature_from_callable(obj, sigcls=cls,
+/usr/local/lib/python3.11/inspect.py:2456: in _signature_from_callable
+    raise TypeError('{!r} is not a callable object'.format(obj))
+E   TypeError: Depends(dependency=<app.modules.auth.deps.RoleChecker object at 0x70af1b3f3e90>, use_cache=True, scope=None) is not a callable object

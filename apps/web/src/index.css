@@ -1,0 +1,114 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Helpdesk Design Tokens */
+    --background: 60 6% 97%;
+    /* #f5f5f2 light gray */
+    --foreground: 60 5% 4%;
+    /* #11110d dark */
+    --card: 0 0% 100%;
+    --card-foreground: 60 5% 4%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 60 5% 4%;
+
+    /* Primary: Lime #d1f470 */
+    --primary: 76 85% 70%;
+    --primary-foreground: 60 5% 4%;
+
+    --secondary: 60 6% 94%;
+    --secondary-foreground: 60 5% 20%;
+    --muted: 60 6% 94%;
+    --muted-foreground: 60 3% 46%;
+    --accent: 140 30% 25%;
+    /* Dark green accent */
+    --accent-foreground: 60 6% 97%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 60 6% 88%;
+    --input: 60 6% 88%;
+    --ring: 76 85% 70%;
+    --radius: 0.5rem;
+
+    /* Agent Sidebar - Dark Theme */
+    --sidebar-background: 140 25% 12%;
+    /* #203524 dark green */
+    --sidebar-foreground: 60 6% 92%;
+    --sidebar-primary: 76 85% 70%;
+    /* Lime */
+    --sidebar-primary-foreground: 60 5% 4%;
+    --sidebar-accent: 140 20% 18%;
+    --sidebar-accent-foreground: 60 6% 92%;
+    --sidebar-border: 140 20% 20%;
+    --sidebar-ring: 76 85% 70%;
+
+    /* Warning/Info */
+    --warning: 45 100% 51%;
+    --warning-foreground: 60 5% 4%;
+    --info: 200 80% 50%;
+    --info-foreground: 0 0% 100%;
+    --success: 140 60% 40%;
+    --success-foreground: 0 0% 100%;
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+}
+
+/* Status Badges */
+.badge-new {
+  @apply bg-blue-100 text-blue-800 border-blue-200;
+}
+
+.badge-open {
+  @apply bg-yellow-100 text-yellow-800 border-yellow-200;
+}
+
+.badge-pending {
+  @apply bg-orange-100 text-orange-800 border-orange-200;
+}
+
+.badge-resolved {
+  @apply bg-green-100 text-green-800 border-green-200;
+}
+
+.badge-closed {
+  @apply bg-gray-100 text-gray-800 border-gray-200;
+}
+
+/* Priority Badges */
+.priority-low {
+  @apply text-gray-600;
+}
+
+.priority-medium {
+  @apply text-blue-600;
+}
+
+.priority-high {
+  @apply text-orange-600;
+}
+
+.priority-urgent {
+  @apply text-red-600 font-semibold;
+}
+
+/* Transitions */
+.transition-colors {
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease;
+}
+
+/* Loading Skeleton */
+.skeleton {
+  @apply animate-pulse bg-gray-200 rounded;
+}
