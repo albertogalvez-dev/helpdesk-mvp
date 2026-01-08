@@ -16,7 +16,7 @@ interface UserItem {
 function RoleBadge({ role }: { role: string }) {
     const styles: Record<string, string> = {
         admin: "bg-purple-100 text-purple-800",
-        agent: "bg-blue-100 text-blue-800",
+        agent: "bg-lime-100 text-lime-800",
         customer: "bg-gray-100 text-gray-600",
     };
     return (
