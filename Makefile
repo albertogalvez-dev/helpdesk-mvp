@@ -1,4 +1,4 @@
-.PHONY: up down logs ps build test lint format migrate seed smoke run-job
+.PHONY: up down logs ps build test lint format migrate seed smoke run-job screenshots
 
 up:
 	docker compose -f infra/docker-compose.yml --env-file .env up -d
@@ -45,3 +45,9 @@ run-job:
 		-H "Content-Type: application/json" \
 		-d '{"job": "$(JOB)"}' \
 		-H "Authorization: Bearer $(shell cat .token 2>/dev/null || echo 'LOGIN_FIRST')"
+
+screenshots:
+	@echo "📸 Installing screenshot dependencies..."
+	cd scripts/screenshots && npm install && npx playwright install chromium
+	@echo "📸 Capturing screenshots (ensure 'make up' is running)..."
+	cd scripts/screenshots && npm run capture
