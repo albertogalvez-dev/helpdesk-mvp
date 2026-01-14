@@ -9,8 +9,8 @@ curl -s "$BASE_URL/../health" | grep "ok" && echo " [OK]" || echo " [FAIL]"
 
 echo "2. Login Admin..."
 TOKEN=$(curl -s -X POST "$BASE_URL/auth/login" \
-  -H "Content-Type: application/x-www-form-urlencoded" \
-  -d "username=$ADMIN_EMAIL&password=$PASSWORD" | grep -o '"access_token":"[^"]*' | cut -d'"' -f4)
+  -H "Content-Type: application/json" \
+  -d "{\"email\":\"$ADMIN_EMAIL\",\"password\":\"$PASSWORD\"}" | grep -o '"access_token":"[^"]*' | cut -d'"' -f4)
 
 if [ -z "$TOKEN" ]; then
   echo " [FAIL] Could not get token"

@@ -6,6 +6,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from app.modules.tickets.models import TicketStatus, TicketPriority, TicketChannel
 from app.modules.tags.schemas import TagResponse
+from app.modules.users.schemas import UserRead
+from app.modules.workspaces.schemas import WorkspaceRead
 
 
 class UserProfileResponse(BaseModel):
@@ -55,8 +57,9 @@ class TicketResponse(TicketBase):
     tags: list[TagResponse] = []
     
     # Expanded details for UI
-    requester: dict | None = None # Full object {id, full_name, email, profile}
-    workspace: dict | None = None # Full object {id, name, profile}
+    requester: UserRead | None = None 
+    workspace: WorkspaceRead | None = None
+    assigned_agent: UserRead | None = None
 
     model_config = ConfigDict(from_attributes=True)
 

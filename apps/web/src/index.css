@@ -1,272 +1,237 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* ═══════════════════════════════════════════════════════════
-       HELPDESK DESIGN SYSTEM - Zendesk-Inspired Tokens
-       ═══════════════════════════════════════════════════════════ */
-
-    /* Primary Colors */
-    --primary-green: #d1f470;
-    --primary-green-hover: #c5e865;
-    --primary-green-muted: rgba(209, 244, 112, 0.2);
-
-    /* Dark Theme */
-    --dark-primary: #11110d;
-    --dark-secondary: #42433e;
-    --dark-tertiary: #203524;
-    --green-dark: #355e34;
-    --green-darker: #203524;
-
-    /* Light Theme */
-    --white: #ffffff;
-    --light-gray: #f5f5f2;
-
-    /* Text Colors */
-    --text-primary: #11110d;
-    --text-secondary: #6b7280;
-    --text-muted: rgba(17, 17, 13, 0.5);
-    --text-white: #ffffff;
-
-    /* Border Colors */
-    --border-light: rgba(17, 17, 13, 0.1);
-    --border-medium: rgba(17, 17, 13, 0.2);
-    --border-dark: rgba(17, 17, 13, 0.32);
-    --border-white: rgba(255, 255, 255, 0.2);
-
-    /* Background Overlays */
-    --bg-overlay-light: rgba(17, 17, 13, 0.04);
-    --bg-overlay-medium: rgba(17, 17, 13, 0.08);
-    --bg-overlay-dark: rgba(255, 255, 255, 0.1);
-    --bg-glass: rgba(255, 255, 255, 0.95);
-
-    /* Shadows */
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
-    --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
-    --shadow-lg: 0 10px 40px rgba(0, 0, 0, 0.12);
-
-    /* Border Radius */
-    --radius-sm: 8px;
-    --radius-md: 12px;
-    --radius-lg: 16px;
-    --radius-full: 9999px;
-
-    /* Spacing (8px base) */
-    --s-1: 8px;
-    --s-2: 16px;
-    --s-3: 24px;
-    --s-4: 32px;
-    --s-5: 48px;
-    --s-6: 72px;
-
-    /* Animation */
-    --ease: cubic-bezier(0.4, 0, 0.2, 1);
-    --duration-fast: 0.15s;
-    --duration-normal: 0.2s;
-    --duration-slow: 0.3s;
-
-    /* ═══════════════════════════════════════════════════════════
-       SHADCN/TAILWIND INTEGRATION
-       ═══════════════════════════════════════════════════════════ */
-    --background: 60 6% 97%;
-    --foreground: 60 5% 4%;
+    /* Primary lime green theme */
+    --background: 60 7% 97%;
+    --foreground: 75 29% 6%;
     --card: 0 0% 100%;
-    --card-foreground: 60 5% 4%;
+    --card-foreground: 75 29% 6%;
     --popover: 0 0% 100%;
-    --popover-foreground: 60 5% 4%;
-
-    /* Primary: Lime */
-    --primary: 76 85% 70%;
-    --primary-foreground: 60 5% 4%;
-
-    --secondary: 60 6% 94%;
-    --secondary-foreground: 60 5% 20%;
-    --muted: 60 6% 94%;
-    --muted-foreground: 60 3% 46%;
-    --accent: 140 30% 25%;
-    --accent-foreground: 60 6% 97%;
+    --popover-foreground: 75 29% 6%;
+    --primary: 76 85% 69%;
+    --primary-foreground: 75 29% 6%;
+    --secondary: 60 6% 96%;
+    --secondary-foreground: 75 15% 20%;
+    --muted: 60 5% 96%;
+    --muted-foreground: 75 20% 45%;
+    --accent: 60 6% 96%;
+    --accent-foreground: 75 15% 20%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 100%;
-    --border: 60 6% 88%;
-    --input: 60 6% 88%;
-    --ring: 76 85% 70%;
-    --radius: 0.5rem;
+    --border: 60 15% 90%;
+    --input: 60 15% 90%;
+    --ring: 76 85% 69%;
+    --radius: 0.75rem;
 
-    /* Agent Sidebar - Dark Theme */
-    --sidebar-background: 140 25% 12%;
-    --sidebar-foreground: 60 6% 85%;
-    --sidebar-primary: 76 85% 70%;
-    --sidebar-primary-foreground: 60 5% 4%;
-    --sidebar-accent: 140 20% 18%;
-    --sidebar-accent-foreground: 60 6% 92%;
-    --sidebar-border: 140 20% 20%;
-    --sidebar-ring: 76 85% 70%;
+    /* Sidebar */
+    --sidebar-background: 0 0% 100%;
+    --sidebar-foreground: 75 10% 40%;
+    --sidebar-primary: 75 29% 6%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 76 85% 69%;
+    --sidebar-accent-foreground: 75 29% 6%;
+    --sidebar-border: 60 15% 90%;
+    --sidebar-ring: 76 85% 69%;
 
-    /* Semantic Colors */
-    --warning: 45 100% 51%;
-    --warning-foreground: 60 5% 4%;
-    --info: 200 80% 50%;
-    --info-foreground: 0 0% 100%;
-    --success: 140 60% 40%;
-    --success-foreground: 0 0% 100%;
+    /* Custom design tokens */
+    --text-main: #171c0d;
+    --text-secondary: #819b4b;
+    --bg-light: #f7f8f6;
+    --border-light: #eff3e7;
+    --primary-hex: #c9f56b;
+    --primary-dark: #b8e45a;
   }
-}
 
-@layer base {
+  .dark {
+    --background: 75 29% 9%;
+    --foreground: 60 7% 97%;
+    --card: 75 25% 10%;
+    --card-foreground: 60 7% 97%;
+    --popover: 75 25% 10%;
+    --popover-foreground: 60 7% 97%;
+    --primary: 76 85% 69%;
+    --primary-foreground: 75 29% 6%;
+    --secondary: 75 15% 20%;
+    --secondary-foreground: 60 7% 90%;
+    --muted: 75 15% 15%;
+    --muted-foreground: 75 10% 60%;
+    --accent: 75 15% 20%;
+    --accent-foreground: 60 7% 90%;
+    --destructive: 0 84% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 75 15% 20%;
+    --input: 75 15% 20%;
+    --ring: 76 85% 69%;
+
+    --sidebar-background: 75 29% 9%;
+    --sidebar-foreground: 75 10% 60%;
+    --sidebar-primary: 60 7% 97%;
+    --sidebar-primary-foreground: 75 29% 6%;
+    --sidebar-accent: 76 85% 69%;
+    --sidebar-accent-foreground: 75 29% 6%;
+    --sidebar-border: 75 15% 20%;
+    --sidebar-ring: 76 85% 69%;
+
+    --text-main: #f7f8f6;
+    --text-secondary: #a6c175;
+    --bg-light: #1c2210;
+    --border-light: #323d1d;
+  }
+
   * {
-    border-color: hsl(var(--border));
+    @apply border-border;
   }
 
   body {
     @apply bg-background text-foreground antialiased;
-    font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    font-feature-settings: 'cv02', 'cv03', 'cv04', 'cv11';
+    font-family: "Inter", system-ui, -apple-system, sans-serif;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
-  /* Focus Ring */
   :focus-visible {
-    outline: 2px solid var(--primary-green);
+    outline: 2px solid hsl(var(--ring));
     outline-offset: 2px;
   }
-}
 
-/* ═══════════════════════════════════════════════════════════
-   STATUS BADGES
-   ═══════════════════════════════════════════════════════════ */
-.badge-new {
-  background-color: var(--primary-green-muted);
-  color: var(--dark-primary);
-  border: 1px solid rgba(209, 244, 112, 0.4);
-}
-
-.badge-open {
-  @apply bg-amber-50 text-amber-700 border border-amber-200;
-}
-
-.badge-pending {
-  @apply bg-orange-50 text-orange-700 border border-orange-200;
-}
-
-.badge-resolved {
-  @apply bg-emerald-50 text-emerald-700 border border-emerald-200;
-}
-
-.badge-closed {
-  @apply bg-gray-100 text-gray-600 border border-gray-200;
-}
-
-/* ═══════════════════════════════════════════════════════════
-   PRIORITY BADGES
-   ═══════════════════════════════════════════════════════════ */
-.priority-low {
-  @apply text-gray-500;
-}
-
-.priority-medium {
-  color: var(--text-primary);
-}
-
-.priority-high {
-  @apply text-orange-600 font-medium;
-}
-
-.priority-urgent {
-  @apply text-red-600 font-semibold;
-}
-
-/* ═══════════════════════════════════════════════════════════
-   SLA BADGES
-   ═══════════════════════════════════════════════════════════ */
-.sla-ok {
-  @apply bg-emerald-50 text-emerald-700 border border-emerald-200;
-}
-
-.sla-due-soon {
-  @apply bg-amber-50 text-amber-700 border border-amber-200;
-}
-
-.sla-breached {
-  @apply bg-red-50 text-red-700 border border-red-200;
-}
-
-/* ═══════════════════════════════════════════════════════════
-   TABLE STYLES
-   ═══════════════════════════════════════════════════════════ */
-.table-dense {
-  @apply text-sm;
-}
-
-.table-dense th {
-  @apply px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider bg-gray-50 border-b;
-}
-
-.table-dense td {
-  @apply px-4 py-3 whitespace-nowrap;
-}
-
-.table-dense tbody tr {
-  @apply border-b border-gray-100 transition-colors;
-  transition: background-color var(--duration-fast) var(--ease);
-}
-
-.table-dense tbody tr:hover {
-  background-color: var(--bg-overlay-light);
-}
-
-/* ═══════════════════════════════════════════════════════════
-   CARD STYLES
-   ═══════════════════════════════════════════════════════════ */
-.card-premium {
-  @apply bg-white rounded-xl border shadow-sm;
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-sm);
-}
-
-.card-premium:hover {
-  box-shadow: var(--shadow-md);
-}
-
-/* ═══════════════════════════════════════════════════════════
-   BUTTON STYLES
-   ═══════════════════════════════════════════════════════════ */
-.btn-primary {
-  background-color: var(--primary-green);
-  color: var(--dark-primary);
-  border-radius: var(--radius-md);
-  font-weight: 500;
-  transition: all var(--duration-normal) var(--ease);
-}
-
-.btn-primary:hover {
-  background-color: var(--primary-green-hover);
-  box-shadow: var(--shadow-md);
-}
-
-/* ═══════════════════════════════════════════════════════════
-   SKELETON LOADERS
-   ═══════════════════════════════════════════════════════════ */
-.skeleton {
-  @apply animate-pulse rounded;
-  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: 200% 0;
+  /* Material Symbols configuration */
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    font-size: 20px;
+    vertical-align: middle;
   }
 
-  100% {
-    background-position: -200% 0;
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: hsl(var(--border));
+    border-radius: 10px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: hsl(var(--muted-foreground) / 0.3);
   }
 }
 
-/* ═══════════════════════════════════════════════════════════
-   TRANSITIONS
-   ═══════════════════════════════════════════════════════════ */
-.transition-all-smooth {
-  transition: all var(--duration-normal) var(--ease);
+@layer components {
+
+  /* Table styles */
+  .table-dense {
+    @apply text-sm;
+  }
+
+  .table-dense th {
+    @apply px-6 py-4 text-left text-[11px] font-bold uppercase tracking-widest text-muted-foreground border-b;
+  }
+
+  .table-dense td {
+    @apply px-6 py-5 whitespace-nowrap;
+  }
+
+  .table-dense tbody tr {
+    @apply border-b transition-colors;
+  }
+
+  .table-dense tbody tr:hover {
+    @apply bg-primary/5;
+  }
+
+  /* Glass effect */
+  .glass-bg {
+    backdrop-filter: blur(8px);
+    background-color: rgba(255, 255, 255, 0.7);
+  }
+
+  .dark .glass-bg {
+    background-color: rgba(28, 34, 16, 0.8);
+  }
+
+  /* Status badges */
+  .status-badge {
+    @apply px-2.5 py-0.5 rounded-full text-xs font-semibold uppercase tracking-wider;
+  }
+
+  .status-open {
+    @apply bg-primary/20 text-foreground;
+  }
+
+  .status-pending {
+    @apply bg-blue-100 text-blue-700;
+  }
+
+  .status-solved {
+    @apply bg-green-100 text-green-700;
+  }
+
+  .status-closed {
+    @apply bg-gray-100 text-gray-600;
+  }
+
+  /* Policy card hover */
+  .policy-card {
+    @apply transition-all;
+  }
+
+  .policy-card:hover {
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05);
+    border-color: hsl(var(--primary));
+  }
+
+  /* Active nav indicator */
+  .nav-active {
+    @apply bg-primary/20 text-foreground font-medium;
+  }
+
+  /* Ticket row hover */
+  .ticket-row:hover {
+    background-color: hsl(var(--primary) / 0.05);
+  }
+
+  /* Hero gradient */
+  .hero-gradient {
+    background-image: linear-gradient(135deg, hsl(var(--primary) / 0.05) 0%, hsl(var(--background)) 100%);
+  }
+
+  /* SLA progress bars */
+  .sla-bar {
+    @apply h-1.5 w-full rounded-full overflow-hidden;
+    background: hsl(var(--border));
+  }
+
+  .sla-bar-fill {
+    @apply h-full rounded-full bg-primary;
+  }
+
+  .sla-bar-danger .sla-bar-fill {
+    @apply bg-destructive;
+  }
+}
+
+@layer utilities {
+
+  /* Hide scrollbar but keep functionality */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Custom focus ring for primary elements */
+  .focus-primary:focus {
+    box-shadow: 0 0 0 2px hsl(var(--primary) / 0.3);
+  }
 }

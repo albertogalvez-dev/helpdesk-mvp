@@ -34,3 +34,15 @@ Thumbs.db
 # Temporary
 *.tmp
 *.temp
+
+# Build artifacts
+*.tsbuildinfo
+
+# Screenshots (regenerated via make screenshots)
+# Uncomment if you want to track screenshots in git:
+# !@fotos/
+
+# Test/debug outputs
+test_output*.txt
+test_sla*.txt
+test_tickets*.txt

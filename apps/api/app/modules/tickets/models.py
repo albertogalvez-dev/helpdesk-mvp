@@ -62,6 +62,11 @@ class Ticket(Base):
 
     # Relationships
     tags = relationship("Tag", secondary="ticket_tags", backref="tickets", lazy="selectin")
+    
+    # Naming the relationship 'requester' to match schemas.py
+    requester = relationship("User", foreign_keys=[created_by_user_id], lazy="selectin")
+    assigned_agent = relationship("User", foreign_keys=[assigned_agent_id], lazy="selectin")
+    workspace = relationship("Workspace", foreign_keys=[workspace_id], lazy="selectin")
 
 
 class TicketMessage(Base):

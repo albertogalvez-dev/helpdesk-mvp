@@ -19,6 +19,14 @@ class User(Base):
     role: Mapped[Role] = mapped_column(SAEnum(Role, native_enum=False), nullable=False) 
     is_active: Mapped[bool] = mapped_column(Boolean, default=True, nullable=False)
     
+    # Contact info
+    phone: Mapped[str | None] = mapped_column(String, nullable=True)
+    anydesk_id: Mapped[str | None] = mapped_column(String, nullable=True)
+    department: Mapped[str | None] = mapped_column(String, nullable=True)
+    
+    # Subscription
+    subscription_plan: Mapped[str | None] = mapped_column(String, nullable=True, default="free")  # free, pro, enterprise
+    
     workspace_id: Mapped[uuid.UUID] = mapped_column(UUID(as_uuid=True), ForeignKey("workspaces.id"), nullable=False)
     
     created_at: Mapped[datetime] = mapped_column(
@@ -30,3 +38,4 @@ class User(Base):
         onupdate=lambda: datetime.now(timezone.utc),
         nullable=False,
     )
+

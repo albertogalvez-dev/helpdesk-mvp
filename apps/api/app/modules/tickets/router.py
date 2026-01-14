@@ -50,50 +50,6 @@ def get_ticket(
     db: Annotated[Session, Depends(get_db)],
 ):
     result = ticket_service.get_ticket(db, ticket_id, user)
-    
-    # Enrich with profile data for agents/admins
-    if user.role in [Role.ADMIN, Role.AGENT]:
-        result_dict = result.model_dump()
-        
-        # Get requester info
-        requester = db.get(User, result.created_by_user_id)
-        if requester:
-            result_dict["requester"] = {
-                "id": str(requester.id),
-                "full_name": requester.full_name,
-                "email": requester.email,
-                "profile": None  # Will add if profile model exists
-            }
-            # Try to get profile if relationship exists
-            if hasattr(requester, 'profile') and requester.profile:
-                result_dict["requester"]["profile"] = {
-                    "department": requester.profile.department,
-                    "location": requester.profile.location,
-                    "device_label": requester.profile.device_label,
-                    "remote_access_id": requester.profile.remote_access_id,
-                }
-        
-        # Get workspace info
-        workspace = db.get(Workspace, result.workspace_id)
-        if workspace:
-            result_dict["workspace"] = {
-                "id": str(workspace.id),
-                "name": workspace.name,
-                "profile": None
-            }
-            if hasattr(workspace, 'profile') and workspace.profile:
-                result_dict["workspace"]["profile"] = {
-                    "company_name": workspace.profile.company_name,
-                    "contact_email": workspace.profile.contact_email,
-                    "contact_phone": workspace.profile.contact_phone,
-                    "support_hours": workspace.profile.support_hours,
-                    "remote_support_tool": workspace.profile.remote_support_tool,
-                    "remote_support_instructions": workspace.profile.remote_support_instructions,
-                    "security_notes": getattr(workspace.profile, 'security_notes', None),
-                }
-        
-        return APIResponse(data=result_dict)
-    
     return APIResponse(data=result)
 
 

@@ -13,14 +13,37 @@ class UserBase(BaseModel):
     is_active: bool = True
 
 
-class UserCreate(UserBase):
+class UserCreate(BaseModel):
+    email: EmailStr
+    full_name: str | None = None
     password: str
-    workspace_id: uuid.UUID
+    role: str = "customer"
+    phone: str | None = None
+    anydesk_id: str | None = None
+    department: str | None = None
+    subscription_plan: str = "free"
 
 
-class UserRead(UserBase):
+class UserUpdate(BaseModel):
+    full_name: str | None = None
+    is_active: bool | None = None
+    phone: str | None = None
+    anydesk_id: str | None = None
+    department: str | None = None
+    subscription_plan: str | None = None
+
+
+class UserRead(BaseModel):
     id: uuid.UUID
+    email: str
+    full_name: str | None
+    role: Role
+    is_active: bool
     workspace_id: uuid.UUID
+    phone: str | None = None
+    anydesk_id: str | None = None
+    department: str | None = None
+    subscription_plan: str | None = None
     created_at: datetime
     updated_at: datetime
     

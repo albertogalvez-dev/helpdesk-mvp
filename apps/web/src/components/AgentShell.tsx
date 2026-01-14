@@ -1,17 +1,6 @@
 import { Link, Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useAuthStore } from "@/lib/auth";
-import { Button } from "@/components/ui/button";
-import {
-    LayoutDashboard,
-    Inbox,
-    Settings,
-    LogOut,
-    BarChart3,
-    Users,
-    Building2,
-    Clock,
-    ChevronDown,
-} from "lucide-react";
+import { AvatarInitials } from "@/components/AvatarInitials";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 
@@ -29,141 +18,137 @@ export function AgentShell() {
     const isAdmin = user?.role?.toLowerCase() === "admin";
 
     const mainNavItems = [
-        { label: "Inbox", icon: Inbox, path: "/agent/inbox" },
-        { label: "Reports", icon: BarChart3, path: "/agent/reports" },
+        { label: "Inbox", icon: "inbox", path: "/agent/inbox" },
+        { label: "Reports", icon: "analytics", path: "/agent/reports" },
     ];
 
     const adminNavItems = [
-        { label: "Users", icon: Users, path: "/agent/admin/users" },
-        { label: "Workspace", icon: Building2, path: "/agent/admin/workspace" },
-        { label: "SLAs", icon: Clock, path: "/agent/admin/slas" },
+        { label: "Users", icon: "group", path: "/agent/admin/users" },
+        { label: "Workspace", icon: "apartment", path: "/agent/admin/workspace" },
+        { label: "SLAs", icon: "timer", path: "/agent/admin/slas" },
     ];
 
     return (
-        <div className="flex h-screen bg-background font-sans">
-            {/* Sidebar - Dark Theme */}
-            <aside className="w-16 lg:w-64 flex flex-col transition-all duration-300 shadow-xl"
-                style={{ backgroundColor: 'hsl(var(--sidebar-background))' }}>
-                {/* Logo */}
-                <div className="h-16 flex items-center justify-center lg:justify-start lg:px-6 border-b"
-                    style={{ borderColor: 'hsl(var(--sidebar-border))', backgroundColor: 'hsl(140 25% 10%)' }}>
-                    <LayoutDashboard className="h-6 w-6 mr-0 lg:mr-3" style={{ color: 'hsl(var(--sidebar-primary))' }} />
-                    <span className="font-bold text-lg hidden lg:block tracking-tight text-white">HelpDesk</span>
-                </div>
-
-                {/* Navigation */}
-                <nav className="flex-1 py-4 px-2 space-y-1 overflow-y-auto">
-                    {mainNavItems.map((item) => (
-                        <Link
-                            key={item.path}
-                            to={item.path}
-                            className={cn(
-                                "flex items-center px-2 lg:px-4 py-3 text-sm font-medium rounded-md transition-colors group",
-                                location.pathname.startsWith(item.path)
-                                    ? "shadow-sm"
-                                    : "hover:opacity-90"
-                            )}
-                            style={{
-                                backgroundColor: location.pathname.startsWith(item.path)
-                                    ? 'hsl(var(--sidebar-accent))'
-                                    : 'transparent',
-                                color: location.pathname.startsWith(item.path)
-                                    ? 'hsl(var(--sidebar-primary))'
-                                    : 'hsl(var(--sidebar-foreground))',
-                            }}
-                        >
-                            <item.icon
-                                className="h-5 w-5 mr-0 lg:mr-3 flex-shrink-0"
-                                style={{
-                                    color: location.pathname.startsWith(item.path)
-                                        ? 'hsl(var(--sidebar-primary))'
-                                        : 'hsl(var(--sidebar-foreground))'
-                                }}
-                            />
-                            <span className="hidden lg:block">{item.label}</span>
-                        </Link>
-                    ))}
-
-                    {/* Admin Section */}
-                    {isAdmin && (
-                        <div className="pt-4 mt-4 border-t" style={{ borderColor: 'hsl(var(--sidebar-border))' }}>
-                            <button
-                                onClick={() => setAdminOpen(!adminOpen)}
-                                className="flex items-center justify-between w-full px-2 lg:px-4 py-2 text-sm font-medium rounded-md transition-colors"
-                                style={{ color: 'hsl(var(--sidebar-foreground))' }}
-                            >
-                                <div className="flex items-center">
-                                    <Settings className="h-5 w-5 mr-0 lg:mr-3" />
-                                    <span className="hidden lg:block">Admin</span>
-                                </div>
-                                <ChevronDown className={cn("h-4 w-4 hidden lg:block transition-transform", adminOpen && "rotate-180")} />
-                            </button>
-
-                            {adminOpen && (
-                                <div className="mt-1 space-y-1 pl-2 lg:pl-4">
-                                    {adminNavItems.map((item) => (
-                                        <Link
-                                            key={item.path}
-                                            to={item.path}
-                                            className={cn(
-                                                "flex items-center px-2 lg:px-4 py-2 text-sm rounded-md transition-colors",
-                                                location.pathname === item.path
-                                                    ? "font-medium"
-                                                    : "hover:opacity-90"
-                                            )}
-                                            style={{
-                                                backgroundColor: location.pathname === item.path
-                                                    ? 'hsl(var(--sidebar-accent))'
-                                                    : 'transparent',
-                                                color: location.pathname === item.path
-                                                    ? 'hsl(var(--sidebar-primary))'
-                                                    : 'hsl(var(--sidebar-foreground))',
-                                            }}
-                                        >
-                                            <item.icon className="h-4 w-4 mr-0 lg:mr-2" />
-                                            <span className="hidden lg:block">{item.label}</span>
-                                        </Link>
-                                    ))}
-                                </div>
-                            )}
+        <div className="flex h-screen bg-background font-sans overflow-hidden">
+            {/* Sidebar */}
+            <aside className="w-64 border-r border-border bg-card flex flex-col justify-between p-4 shrink-0">
+                <div className="flex flex-col gap-8">
+                    {/* Branding */}
+                    <div className="flex items-center gap-3 px-2">
+                        <div className="bg-primary size-8 rounded-lg flex items-center justify-center">
+                            <span className="material-symbols-outlined text-primary-foreground text-xl">bolt</span>
                         </div>
-                    )}
-                </nav>
-
-                {/* User Info */}
-                <div className="p-4 border-t" style={{ borderColor: 'hsl(var(--sidebar-border))', backgroundColor: 'hsl(140 25% 10%)' }}>
-                    <div className="flex items-center mb-4 px-2">
-                        <div
-                            className="h-8 w-8 rounded-full flex items-center justify-center text-xs font-bold ring-2 ring-lime-400"
-                            style={{
-                                backgroundColor: 'hsl(var(--sidebar-primary))',
-                                color: 'hsl(var(--sidebar-primary-foreground))'
-                            }}
-                        >
-                            {user?.full_name?.charAt(0) || "U"}
-                        </div>
-                        <div className="ml-3 hidden lg:block overflow-hidden">
-                            <p className="text-sm font-medium text-white truncate">{user?.full_name}</p>
-                            <p className="text-xs truncate" style={{ color: 'hsl(var(--sidebar-foreground))' }}>{user?.email}</p>
+                        <div>
+                            <h1 className="text-foreground text-base font-bold leading-tight">Helpdesk</h1>
+                            <p className="text-muted-foreground text-xs font-normal">Enterprise Plan</p>
                         </div>
                     </div>
-                    <Button
-                        variant="ghost"
-                        size="sm"
-                        className="w-full justify-center lg:justify-start text-red-400 hover:text-red-300 hover:bg-red-900/20"
-                        onClick={handleLogout}
+
+                    {/* Navigation Links */}
+                    <nav className="flex flex-col gap-1">
+                        {mainNavItems.map((item) => {
+                            const isActive = location.pathname.startsWith(item.path);
+                            return (
+                                <Link
+                                    key={item.path}
+                                    to={item.path}
+                                    className={cn(
+                                        "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors",
+                                        isActive
+                                            ? "bg-primary/20 text-foreground font-medium"
+                                            : "text-muted-foreground hover:bg-muted cursor-pointer"
+                                    )}
+                                >
+                                    <span
+                                        className="material-symbols-outlined"
+                                        style={isActive ? { fontVariationSettings: "'FILL' 1" } : undefined}
+                                    >
+                                        {item.icon}
+                                    </span>
+                                    <span className="text-sm">{item.label}</span>
+                                </Link>
+                            );
+                        })}
+
+                        {/* Admin Section */}
+                        {isAdmin && (
+                            <>
+                                <div className="h-px bg-border my-2 mx-3" />
+                                <button
+                                    onClick={() => setAdminOpen(!adminOpen)}
+                                    className={cn(
+                                        "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors w-full",
+                                        adminOpen ? "bg-primary/20 text-foreground" : "text-muted-foreground hover:bg-muted"
+                                    )}
+                                >
+                                    <span
+                                        className="material-symbols-outlined"
+                                        style={adminOpen ? { fontVariationSettings: "'FILL' 1" } : undefined}
+                                    >
+                                        settings
+                                    </span>
+                                    <span className="text-sm font-medium">Admin</span>
+                                    <span className={cn("material-symbols-outlined text-sm ml-auto transition-transform", adminOpen && "rotate-180")}>
+                                        expand_more
+                                    </span>
+                                </button>
+
+                                {adminOpen && (
+                                    <div className="mt-1 space-y-1 pl-4">
+                                        {adminNavItems.map((item) => {
+                                            const isActive = location.pathname === item.path;
+                                            return (
+                                                <Link
+                                                    key={item.path}
+                                                    to={item.path}
+                                                    className={cn(
+                                                        "flex items-center gap-3 px-3 py-2 rounded-lg transition-colors text-sm",
+                                                        isActive
+                                                            ? "bg-primary/20 text-foreground font-medium"
+                                                            : "text-muted-foreground hover:bg-muted"
+                                                    )}
+                                                >
+                                                    <span className="material-symbols-outlined text-lg">{item.icon}</span>
+                                                    <span>{item.label}</span>
+                                                </Link>
+                                            );
+                                        })}
+                                    </div>
+                                )}
+                            </>
+                        )}
+                    </nav>
+                </div>
+
+                {/* Profile & Action */}
+                <div className="flex flex-col gap-4">
+                    <button
+                        onClick={() => navigate("/agent/inbox")}
+                        className="w-full bg-primary hover:brightness-95 text-primary-foreground py-2.5 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all"
                     >
-                        <LogOut className="h-4 w-4 mr-0 lg:mr-2" />
-                        <span className="hidden lg:block">Logout</span>
-                    </Button>
+                        <span className="material-symbols-outlined text-base">add</span>
+                        New Ticket
+                    </button>
+                    <div className="flex items-center gap-3 border-t border-border pt-4">
+                        <AvatarInitials name={user?.full_name} email={user?.email} size="sm" />
+                        <div className="overflow-hidden flex-1">
+                            <p className="text-sm font-semibold truncate text-foreground">{user?.full_name || "Agent"}</p>
+                            <p className="text-xs text-muted-foreground">Online</p>
+                        </div>
+                        <button
+                            onClick={handleLogout}
+                            className="p-2 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive transition-colors"
+                            title="Logout"
+                        >
+                            <span className="material-symbols-outlined text-lg">logout</span>
+                        </button>
+                    </div>
                 </div>
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 flex flex-col min-w-0 overflow-hidden bg-background">
-                <div className="flex-1 overflow-auto">
-                    <Outlet />
-                </div>
+            <main className="flex-1 flex flex-col h-full bg-card overflow-hidden">
+                <Outlet />
             </main>
         </div>
     );

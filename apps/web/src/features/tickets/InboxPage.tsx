@@ -1,43 +1,13 @@
 import { useQuery } from "@tanstack/react-query";
 import { api } from "@/lib/api";
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import { StatusBadge } from "@/components/StatusBadge";
+import { PriorityBadge } from "@/components/PriorityBadge";
+import { AvatarInitials } from "@/components/AvatarInitials";
+import { EmptyState } from "@/components/EmptyState";
 import { useState } from "react";
-import { Search, X, Inbox as InboxIcon, Clock } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { cn } from "@/lib/utils";
 
-// Status badge component with design tokens
-function StatusBadge({ status }: { status: string }) {
-    const classes: Record<string, string> = {
-        NEW: "badge-new",
-        OPEN: "badge-open",
-        PENDING: "badge-pending",
-        RESOLVED: "badge-resolved",
-        CLOSED: "badge-closed",
-    };
-    return (
-        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${classes[status] || "badge-closed"}`}>
-            {status}
-        </span>
-    );
-}
-
-// Priority badge component
-function PriorityBadge({ priority }: { priority: string }) {
-    const classes: Record<string, string> = {
-        LOW: "priority-low",
-        MEDIUM: "priority-medium",
-        HIGH: "priority-high",
-        URGENT: "priority-urgent",
-    };
-    return (
-        <span className={`text-sm ${classes[priority] || ""}`}>
-            {priority === "URGENT" && "🔥 "}{priority}
-        </span>
-    );
-}
-
-// Relative time formatter
 function formatRelativeTime(date: string): string {
     const now = new Date();
     const d = new Date(date);
@@ -53,221 +23,356 @@ function formatRelativeTime(date: string): string {
     return d.toLocaleDateString();
 }
 
-// Skeleton loader
-function TableSkeleton() {
-    return (
-        <>
-            {[1, 2, 3, 4, 5].map((i) => (
-                <tr key={i} className="border-b border-gray-100">
-                    <td className="px-4 py-3">
-                        <div className="skeleton h-4 w-48 mb-2" />
-                        <div className="skeleton h-3 w-24" />
-                    </td>
-                    <td className="px-4 py-3"><div className="skeleton h-5 w-16 rounded-full" /></td>
-                    <td className="px-4 py-3"><div className="skeleton h-4 w-16" /></td>
-                    <td className="px-4 py-3"><div className="skeleton h-4 w-20" /></td>
-                </tr>
-            ))}
-        </>
-    );
-}
-
-// Empty state component
-function EmptyState({ hasFilters, onClear }: { hasFilters: boolean; onClear: () => void }) {
-    return (
-        <tr>
-            <td colSpan={4} className="p-12 text-center">
-                <div className="flex flex-col items-center gap-3">
-                    <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center">
-                        <InboxIcon className="h-6 w-6 text-gray-400" />
-                    </div>
-                    <div>
-                        <p className="font-medium text-gray-900">No tickets found</p>
-                        <p className="text-sm text-gray-500 mt-1">
-                            {hasFilters ? "Try adjusting your filters" : "New tickets will appear here"}
-                        </p>
-                    </div>
-                    {hasFilters && (
-                        <Button variant="outline" size="sm" onClick={onClear}>
-                            Clear filters
-                        </Button>
-                    )}
-                </div>
-            </td>
-        </tr>
-    );
-}
-
 export function InboxPage() {
+    const navigate = useNavigate();
     const [page, setPage] = useState(1);
     const [status, setStatus] = useState<string>("");
+    const [priority, setPriority] = useState<string>("");
     const [search, setSearch] = useState("");
+    const [activeTab, setActiveTab] = useState("inbox");
+    const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null);
 
-    const hasFilters = status !== "" || search !== "";
+    const hasFilters = status !== "" || priority !== "" || search !== "";
 
-    const { data, isLoading, isError } = useQuery({
-        queryKey: ["tickets", page, status, search],
+    const { data, isLoading, isError, isFetching } = useQuery({
+        queryKey: ["tickets", page, status, priority, search],
         queryFn: async () => {
             const params = new URLSearchParams({
                 page: page.toString(),
                 size: "20",
                 sort: "updated_at",
-                order: "desc"
+                order: "desc",
             });
             if (status) params.append("status", status);
+            if (priority) params.append("priority", priority);
             if (search) params.append("q", search);
 
             const res = await api.get(`/tickets?${params.toString()}`);
             return res.data;
         },
-        placeholderData: (prev) => prev, // Keep previous data while loading
+        placeholderData: (prev) => prev,
     });
 
     const tickets = data?.data || [];
     const meta = data?.meta || {};
-    const totalPages = Math.ceil((meta.total || 0) / (meta.size || 20));
 
-    const clearFilters = () => {
-        setStatus("");
-        setSearch("");
-        setPage(1);
-    };
+    const selectedTicket = selectedTicketId
+        ? tickets.find((t: any) => t.id === selectedTicketId)
+        : tickets[0];
+
+    const tabs = [
+        { id: "inbox", label: "Inbox" },
+        { id: "unassigned", label: "Unassigned" },
+        { id: "breached", label: "Breached", count: 12 },
+        { id: "mine", label: "Mine" },
+    ];
 
     return (
-        <div className="p-6 space-y-4">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-                <div>
-                    <h1 className="text-2xl font-bold tracking-tight">Inbox</h1>
-                    <p className="text-sm text-gray-500 mt-0.5">
-                        {meta.total ? `${meta.total} ticket${meta.total !== 1 ? 's' : ''}` : 'Manage support tickets'}
-                    </p>
-                </div>
-            </div>
-
-            {/* Filters */}
-            <div className="flex gap-3 items-center bg-white p-4 rounded-xl border" style={{ boxShadow: 'var(--shadow-sm)' }}>
-                <div className="relative flex-1 max-w-xs">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <Input
-                        placeholder="Search tickets..."
-                        className="pl-9 pr-8"
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
-                    {search && (
-                        <button
-                            onClick={() => setSearch("")}
-                            className="absolute right-2 top-1/2 -translate-y-1/2 p-1 hover:bg-gray-100 rounded"
-                        >
-                            <X className="h-3 w-3 text-gray-400" />
-                        </button>
-                    )}
-                </div>
-                <select
-                    className="h-9 rounded-lg border border-input bg-white px-3 py-1 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    value={status}
-                    onChange={(e) => setStatus(e.target.value)}
-                    style={{ borderRadius: 'var(--radius-md)' }}
-                >
-                    <option value="">All Statuses</option>
-                    <option value="NEW">New</option>
-                    <option value="OPEN">Open</option>
-                    <option value="PENDING">Pending</option>
-                    <option value="RESOLVED">Resolved</option>
-                    <option value="CLOSED">Closed</option>
-                </select>
-                {hasFilters && (
-                    <Button variant="ghost" size="sm" onClick={clearFilters} className="text-gray-500">
-                        <X className="h-4 w-4 mr-1" /> Reset
-                    </Button>
-                )}
-            </div>
-
-            {/* Table */}
-            <div className="rounded-xl border bg-white overflow-hidden" style={{ boxShadow: 'var(--shadow-sm)' }}>
-                <table className="w-full table-dense">
-                    <thead>
-                        <tr>
-                            <th>Subject</th>
-                            <th className="w-28">Status</th>
-                            <th className="w-28">Priority</th>
-                            <th className="w-32">Updated</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {isLoading && <TableSkeleton />}
-
-                        {isError && (
-                            <tr>
-                                <td colSpan={4} className="p-8 text-center text-red-600">
-                                    Failed to load tickets. Please try again.
-                                </td>
-                            </tr>
-                        )}
-
-                        {!isLoading && !isError && tickets.map((t: any) => (
-                            <tr key={t.id} className="cursor-pointer">
-                                <td>
-                                    <Link to={`/agent/tickets/${t.id}`} className="block group">
-                                        <span className="font-medium text-gray-900 group-hover:text-primary transition-colors">
-                                            {t.subject}
-                                        </span>
-                                        <div className="text-gray-400 text-xs mt-0.5 flex items-center gap-2">
-                                            <span>#{t.id.slice(0, 8)}</span>
-                                            <span>•</span>
-                                            <span>{t.channel}</span>
-                                        </div>
-                                    </Link>
-                                </td>
-                                <td>
-                                    <StatusBadge status={t.status} />
-                                </td>
-                                <td>
-                                    <PriorityBadge priority={t.priority} />
-                                </td>
-                                <td className="text-gray-500 text-sm">
-                                    <div className="flex items-center gap-1">
-                                        <Clock className="h-3 w-3" />
-                                        {formatRelativeTime(t.updated_at || t.created_at)}
-                                    </div>
-                                </td>
-                            </tr>
-                        ))}
-
-                        {!isLoading && !isError && tickets.length === 0 && (
-                            <EmptyState hasFilters={hasFilters} onClear={clearFilters} />
-                        )}
-                    </tbody>
-                </table>
-            </div>
-
-            {/* Pagination */}
-            {totalPages > 1 && (
-                <div className="flex justify-between items-center text-sm text-gray-500">
-                    <span>
-                        Page {meta.page || 1} of {totalPages}
-                    </span>
+        <div className="flex flex-col h-full">
+            {/* Header with Search & Filters */}
+            <header className="border-b border-border px-6 py-4 flex items-center justify-between bg-card">
+                <div className="flex items-center gap-6 flex-1">
+                    <div className="relative max-w-md w-full">
+                        <span className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">search</span>
+                        <input
+                            className="w-full pl-10 pr-4 py-2 rounded-lg border-none bg-muted text-sm focus:ring-2 focus:ring-primary/50 text-foreground placeholder:text-muted-foreground"
+                            placeholder="Search tickets..."
+                            type="text"
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
+                    </div>
+                    {/* Chips/Filters */}
                     <div className="flex gap-2">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setPage(p => Math.max(1, p - 1))}
-                            disabled={page === 1}
-                        >
-                            Previous
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setPage(p => p + 1)}
-                            disabled={page >= totalPages}
-                        >
-                            Next
-                        </Button>
+                        <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted text-xs font-medium text-foreground">
+                            Status: {status || "All"}
+                            <span className="material-symbols-outlined text-sm">expand_more</span>
+                        </button>
+                        <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted text-xs font-medium text-foreground">
+                            Priority: {priority || "Any"}
+                            <span className="material-symbols-outlined text-sm">expand_more</span>
+                        </button>
+                        <button className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted text-xs font-medium text-foreground">
+                            Assignee: Me
+                            <span className="material-symbols-outlined text-sm">expand_more</span>
+                        </button>
                     </div>
                 </div>
-            )}
+                <div className="flex items-center gap-3">
+                    <button className="p-2 rounded-lg hover:bg-muted text-muted-foreground">
+                        <span className="material-symbols-outlined">notifications</span>
+                    </button>
+                    <button className="p-2 rounded-lg hover:bg-muted text-muted-foreground">
+                        <span className="material-symbols-outlined">more_vert</span>
+                    </button>
+                </div>
+            </header>
+
+            {/* Tabs Navigation */}
+            <div className="px-6 border-b border-border bg-card">
+                <div className="flex gap-8">
+                    {tabs.map((tab) => (
+                        <button
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            className={cn(
+                                "py-4 border-b-2 text-sm font-medium transition-colors",
+                                activeTab === tab.id
+                                    ? "border-primary text-foreground font-bold"
+                                    : "border-transparent text-muted-foreground hover:text-foreground"
+                            )}
+                        >
+                            {tab.label}
+                            {tab.count && (
+                                <span className="bg-destructive/10 text-destructive px-1.5 py-0.5 rounded text-[10px] ml-1">
+                                    {tab.count}
+                                </span>
+                            )}
+                        </button>
+                    ))}
+                </div>
+            </div>
+
+            {/* Split Layout */}
+            <div className="flex flex-1 overflow-hidden">
+                {/* Ticket List Section */}
+                <div className="w-[450px] border-r border-border flex flex-col h-full bg-background">
+                    <div className="overflow-y-auto flex-1 pb-4">
+                        {isLoading && (
+                            <div className="p-8 text-center text-muted-foreground">
+                                <span className="material-symbols-outlined animate-spin text-2xl">refresh</span>
+                                <p className="mt-2 text-sm">Loading tickets...</p>
+                            </div>
+                        )}
+
+                        {!isLoading && tickets.length === 0 && (
+                            <div className="p-8">
+                                <EmptyState
+                                    title={hasFilters ? "No tickets found" : "All clear"}
+                                    description={hasFilters ? "Try adjusting your filters." : "New tickets will appear here."}
+                                    icon={<span className="material-symbols-outlined text-4xl">inbox</span>}
+                                />
+                            </div>
+                        )}
+
+                        {!isLoading && tickets.map((ticket: any, index: number) => (
+                            <div
+                                key={ticket.id}
+                                onClick={() => {
+                                    setSelectedTicketId(ticket.id);
+                                }}
+                                onDoubleClick={() => navigate(`/agent/tickets/${ticket.id}`)}
+                                className={cn(
+                                    "border-b border-border p-4 cursor-pointer relative group transition-colors",
+                                    selectedTicket?.id === ticket.id
+                                        ? "bg-card border-l-4 border-l-primary"
+                                        : "hover:bg-card"
+                                )}
+                            >
+                                <div className="flex justify-between items-start mb-1">
+                                    <span className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                                        #{ticket.id.slice(0, 8)}
+                                    </span>
+                                    <span className="text-[10px] text-muted-foreground">
+                                        {formatRelativeTime(ticket.updated_at || ticket.created_at)}
+                                    </span>
+                                </div>
+                                <h3 className="text-sm font-semibold text-foreground mb-1 line-clamp-1">
+                                    {ticket.subject}
+                                </h3>
+                                <div className="flex items-center gap-2 mb-3">
+                                    <p className="text-xs text-muted-foreground">
+                                        {ticket.requester?.full_name || "Unknown"} •
+                                        <span className={cn(
+                                            "ml-1 font-medium",
+                                            ticket.priority === "URGENT" || ticket.priority === "HIGH" ? "text-orange-500" :
+                                                ticket.priority === "MEDIUM" ? "text-blue-500" : "text-muted-foreground"
+                                        )}>
+                                            Priority: {ticket.priority}
+                                        </span>
+                                    </p>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                    <StatusBadge status={ticket.status} />
+                                    <div className="flex items-center gap-2">
+                                        <div className="w-16 h-1 bg-border rounded-full overflow-hidden">
+                                            <div
+                                                className="bg-primary h-full"
+                                                style={{ width: `${Math.random() * 80 + 20}%` }}
+                                            />
+                                        </div>
+                                        <span className="text-[10px] font-medium text-muted-foreground">SLA</span>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                {/* Ticket Detail Preview */}
+                <div className="flex-1 flex flex-col bg-card overflow-hidden">
+                    {selectedTicket ? (
+                        <>
+                            {/* Ticket Title Area */}
+                            <div className="p-8 border-b border-border">
+                                <div className="flex justify-between items-start mb-4">
+                                    <div>
+                                        <h2 className="text-2xl font-bold text-foreground mb-2">
+                                            #{selectedTicket.id.slice(0, 8)}: {selectedTicket.subject}
+                                        </h2>
+                                        <div className="flex items-center gap-3">
+                                            <AvatarInitials
+                                                name={selectedTicket.requester?.full_name}
+                                                email={selectedTicket.requester?.email}
+                                                size="sm"
+                                            />
+                                            <div>
+                                                <p className="text-sm font-semibold text-foreground">
+                                                    {selectedTicket.requester?.full_name || "Unknown"}
+                                                    <span className="text-muted-foreground font-normal text-xs ml-2">
+                                                        {selectedTicket.requester?.email}
+                                                    </span>
+                                                </p>
+                                                <p className="text-xs text-muted-foreground">
+                                                    Submitted {formatRelativeTime(selectedTicket.created_at)}
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="flex gap-2">
+                                        <button
+                                            onClick={() => navigate(`/agent/tickets/${selectedTicket.id}`)}
+                                            className="px-4 py-2 bg-primary text-primary-foreground rounded-lg text-sm font-bold hover:brightness-95 transition-all flex items-center gap-2"
+                                        >
+                                            Open Ticket
+                                            <span className="material-symbols-outlined text-sm">open_in_new</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Quick Info */}
+                            <div className="flex-1 overflow-y-auto p-8">
+                                <div className="grid grid-cols-2 gap-6 mb-8">
+                                    <div className="p-4 bg-muted rounded-lg">
+                                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Status</p>
+                                        <StatusBadge status={selectedTicket.status} />
+                                    </div>
+                                    <div className="p-4 bg-muted rounded-lg">
+                                        <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Priority</p>
+                                        <PriorityBadge priority={selectedTicket.priority} />
+                                    </div>
+                                </div>
+
+                                <div className="p-4 bg-muted rounded-lg mb-6">
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-2">Description</p>
+                                    <p className="text-sm text-foreground leading-relaxed">
+                                        {selectedTicket.description || "No description provided."}
+                                    </p>
+                                </div>
+
+                                <p className="text-center text-sm text-muted-foreground">
+                                    Double-click to open full ticket view
+                                </p>
+                            </div>
+                        </>
+                    ) : (
+                        <div className="flex-1 flex items-center justify-center">
+                            <EmptyState
+                                title="No ticket selected"
+                                description="Select a ticket from the list to preview details"
+                                icon={<span className="material-symbols-outlined text-4xl">wysiwyg</span>}
+                            />
+                        </div>
+                    )}
+                </div>
+
+                {/* Right Metadata Panel */}
+                {selectedTicket && (
+                    <div className="w-72 border-l border-border bg-background p-6 overflow-y-auto shrink-0">
+                        <div className="space-y-8">
+                            {/* SLA Progress */}
+                            <div>
+                                <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">
+                                    Service Level Agreement
+                                </h4>
+                                <div className="space-y-4">
+                                    <div>
+                                        <div className="flex justify-between text-xs mb-1.5">
+                                            <span className="text-foreground font-medium">First Response</span>
+                                            <span className="text-muted-foreground">12m left</span>
+                                        </div>
+                                        <div className="sla-bar">
+                                            <div className="sla-bar-fill" style={{ width: "85%" }} />
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <div className="flex justify-between text-xs mb-1.5">
+                                            <span className="text-foreground font-medium">Resolution Time</span>
+                                            <span className="text-muted-foreground">4h left</span>
+                                        </div>
+                                        <div className="sla-bar">
+                                            <div className="sla-bar-fill" style={{ width: "25%" }} />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Ticket Properties */}
+                            <div>
+                                <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-4">
+                                    Properties
+                                </h4>
+                                <div className="space-y-3">
+                                    <div>
+                                        <label className="text-[10px] text-muted-foreground font-medium block mb-1">Assignee</label>
+                                        <div className="flex items-center gap-2 p-2 bg-card border border-border rounded-lg cursor-pointer">
+                                            <div className="size-5 rounded-full bg-primary/30 flex items-center justify-center">
+                                                <span className="material-symbols-outlined text-xs">person</span>
+                                            </div>
+                                            <span className="text-xs font-medium">
+                                                {selectedTicket.assignee?.full_name || "Unassigned"}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label className="text-[10px] text-muted-foreground font-medium block mb-1">Tags</label>
+                                        <div className="flex flex-wrap gap-1">
+                                            <span className="px-2 py-0.5 bg-muted text-[10px] rounded text-muted-foreground">
+                                                support
+                                            </span>
+                                            <span className="px-2 py-0.5 bg-muted text-[10px] rounded text-primary cursor-pointer">
+                                                + add
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Customer Card */}
+                            <div className="p-4 bg-card border border-border rounded-xl">
+                                <h4 className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-3">
+                                    Customer Profile
+                                </h4>
+                                <div className="space-y-2 mb-4">
+                                    <p className="text-xs font-bold">
+                                        {selectedTicket.requester?.company?.name || "Unknown Company"}
+                                    </p>
+                                    <p className="text-[10px] text-muted-foreground">
+                                        Tier: {selectedTicket.requester?.company?.subscription_plan || "Standard"}
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => navigate(`/agent/tickets/${selectedTicket.id}`)}
+                                    className="w-full py-1.5 border border-border text-[10px] font-bold rounded-lg hover:bg-muted"
+                                >
+                                    View Full Ticket
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 }

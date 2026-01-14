@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { LoginPage } from "./features/auth/LoginPage";
+import { LandingPage } from "./features/landing/LandingPage";
+import { PrivacyPage, TermsPage, ContactPage } from "./features/landing/LegalPages";
 import { InboxPage } from "./features/tickets/InboxPage";
 import { TicketDetailPage } from "./features/tickets/TicketDetailPage";
 import { SlasAdminPage } from "./features/slas/SlasAdminPage";
@@ -8,8 +10,11 @@ import { AgentReportsPage } from "./features/reports/AgentReportsPage";
 import { PortalTicketList } from "./features/portal/PortalTicketList";
 import { PortalNewTicket } from "./features/portal/PortalNewTicket";
 import { PortalTicketDetail } from "./features/portal/PortalTicketDetail";
+import { PortalHelpCenter } from "./features/portal/PortalHelpCenter";
+import { PortalAccount } from "./features/portal/PortalAccount";
 import { AdminUsersPage } from "./features/admin/AdminUsersPage";
 import { AdminWorkspacePage } from "./features/admin/AdminWorkspacePage";
+import { UserDetailPage } from "./features/admin/UserDetailPage";
 import { PortalShell } from "./components/PortalShell";
 import { AgentShell } from "./components/AgentShell";
 import { useAuthStore } from "./lib/auth";
@@ -43,6 +48,11 @@ function App() {
         <QueryClientProvider client={queryClient}>
             <BrowserRouter>
                 <Routes>
+                    {/* Public Landing Page */}
+                    <Route path="/" element={<LandingPage />} />
+                    <Route path="/privacy" element={<PrivacyPage />} />
+                    <Route path="/terms" element={<TermsPage />} />
+                    <Route path="/contact" element={<ContactPage />} />
                     <Route path="/login" element={<LoginPage />} />
 
                     {/* Agent Console */}
@@ -53,19 +63,25 @@ function App() {
                         <Route path="reports" element={<AgentReportsPage />} />
                         <Route path="admin/slas" element={<SlasAdminPage />} />
                         <Route path="admin/users" element={<AdminUsersPage />} />
+                        <Route path="admin/users/:id" element={<UserDetailPage />} />
                         <Route path="admin/workspace" element={<AdminWorkspacePage />} />
                     </Route>
+
 
                     {/* Customer Portal */}
                     <Route path="/portal" element={<PortalRoute><PortalShell /></PortalRoute>}>
                         <Route path="" element={<Navigate to="tickets" replace />} />
                         <Route path="tickets" element={<PortalTicketList />} />
                         <Route path="tickets/new" element={<PortalNewTicket />} />
+                        <Route path="new" element={<PortalNewTicket />} />
                         <Route path="tickets/:id" element={<PortalTicketDetail />} />
+                        <Route path="help-center" element={<PortalHelpCenter />} />
+                        <Route path="account" element={<PortalAccount />} />
                     </Route>
 
                     {/* Default Redirect */}
-                    <Route path="*" element={<Navigate to="/login" replace />} />
+                    <Route path="*" element={<Navigate to="/" replace />} />
+
                 </Routes>
             </BrowserRouter>
         </QueryClientProvider>

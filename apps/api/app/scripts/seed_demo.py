@@ -23,6 +23,50 @@ WORKSPACE_NAME = "Acme IT Services"
 ADMIN_EMAIL = "admin@acme.com"
 PASSWORD = "password123"
 
+# Realistic customer data
+REALISTIC_CUSTOMERS = [
+    {
+        "email": "maria.garcia@techcorp.com",
+        "full_name": "María García López",
+        "phone": "+34 612 345 678",
+        "anydesk_id": "987 654 321",
+        "department": "Marketing",
+        "subscription_plan": "pro"
+    },
+    {
+        "email": "john.smith@innovate.io",
+        "full_name": "John Smith",
+        "phone": "+1 555 123 4567",
+        "anydesk_id": "123 456 789",
+        "department": "Engineering",
+        "subscription_plan": "enterprise"
+    },
+    {
+        "email": "laura.martinez@startup.es",
+        "full_name": "Laura Martínez",
+        "phone": "+34 655 987 654",
+        "anydesk_id": "456 789 123",
+        "department": "Sales",
+        "subscription_plan": "pro"
+    },
+    {
+        "email": "david.chen@globaltech.com",
+        "full_name": "David Chen",
+        "phone": "+1 415 555 0123",
+        "anydesk_id": "789 123 456",
+        "department": "IT",
+        "subscription_plan": "enterprise"
+    },
+    {
+        "email": "ana.rodriguez@empresa.com",
+        "full_name": "Ana Rodríguez",
+        "phone": "+34 622 111 222",
+        "anydesk_id": "321 654 987",
+        "department": "Finance",
+        "subscription_plan": "free"
+    }
+]
+
 def seed_demo():
     db = SessionLocal()
     try:
@@ -38,9 +82,19 @@ def seed_demo():
             print(f"Created Workspace ID: {ws.id}")
         else:
             print(f"Workspace exists: {ws.id}")
+        
+        # Delete old generic customers
+        old_customers = db.query(User).filter(
+            User.workspace_id == ws.id,
+            User.email.like("cust%@client.com")
+        ).all()
+        for c in old_customers:
+            db.delete(c)
+        db.commit()
+        print(f"Deleted {len(old_customers)} old generic customers")
             
         # 2. Users
-        def create_user(email, name, role):
+        def create_user(email, name, role, phone=None, anydesk_id=None, department=None, subscription_plan="free"):
             u = db.query(User).filter_by(email=email).first()
             if not u:
                 u = User(
@@ -49,7 +103,11 @@ def seed_demo():
                     password_hash=get_password_hash(PASSWORD),
                     role=role,
                     workspace_id=ws.id,
-                    is_active=True
+                    is_active=True,
+                    phone=phone,
+                    anydesk_id=anydesk_id,
+                    department=department,
+                    subscription_plan=subscription_plan
                 )
                 db.add(u)
                 db.commit()
@@ -58,13 +116,22 @@ def seed_demo():
             return u
 
         print("Seeding Users...")
-        admin = create_user(ADMIN_EMAIL, "Alice Admin", Role.ADMIN)
-        agent1 = create_user("bob@acme.com", "Bob Agent", Role.AGENT)
-        agent2 = create_user("carol@acme.com", "Carol Support", Role.AGENT)
+        admin = create_user(ADMIN_EMAIL, "Alice Admin", Role.ADMIN, phone="+1 555 000 0001", subscription_plan="enterprise")
+        agent1 = create_user("bob@acme.com", "Bob Agent", Role.AGENT, phone="+1 555 000 0002")
+        agent2 = create_user("carol@acme.com", "Carol Support", Role.AGENT, phone="+1 555 000 0003")
         
+        # Create realistic customers
         customers = []
-        for i in range(1, 6):
-            c = create_user(f"cust{i}@client.com", f"Customer {i}", Role.CUSTOMER)
+        for cust_data in REALISTIC_CUSTOMERS:
+            c = create_user(
+                email=cust_data["email"],
+                name=cust_data["full_name"],
+                role=Role.CUSTOMER,
+                phone=cust_data.get("phone"),
+                anydesk_id=cust_data.get("anydesk_id"),
+                department=cust_data.get("department"),
+                subscription_plan=cust_data.get("subscription_plan", "free")
+            )
             customers.append(c)
 
         # 3. Tags
@@ -74,7 +141,7 @@ def seed_demo():
         for t_name in tag_names:
             t = db.query(Tag).filter_by(workspace_id=ws.id, name=t_name).first()
             if not t:
-                t = Tag(workspace_id=ws.id, name=t_name, color=random.choice(["#ff0000", "#00ff00", "#0000ff", "#ffff00", "#00ffff"]))
+                t = Tag(workspace_id=ws.id, name=t_name, color=random.choice(["#22c55e", "#3b82f6", "#f59e0b", "#ef4444", "#8b5cf6"]))
                 db.add(t)
                 db.commit()
                 db.refresh(t)
@@ -87,20 +154,18 @@ def seed_demo():
             policy = SLAPolicy(
                 workspace_id=ws.id,
                 name="Standard SLA",
-                first_response_time_minutes=60, # 1 hour
-                resolution_time_minutes=480, # 8 hours
+                first_response_time_minutes=60,
+                resolution_time_minutes=480,
                 is_active=True
             )
             db.add(policy)
             db.commit()
             db.refresh(policy)
             
-        # 5. Tickets (Realistic Mix)
+        # 5. Tickets
         print("Seeding Tickets...")
         
-        # Helper to create ticket
         def create_ticket_scenario(subject, status, priority, author, assignee=None, created_delta_mins=0, tags=[]):
-            # Check dup
             exists = db.query(Ticket).filter(Ticket.subject == subject, Ticket.workspace_id == ws.id).first()
             if exists: return exists
             
@@ -121,16 +186,11 @@ def seed_demo():
             db.commit()
             db.refresh(t)
             
-            # Tags
             for tag_name in tags:
                 if tag_name in tags_map:
                     tt = TicketTag(ticket_id=t.id, tag_id=tags_map[tag_name].id)
                     db.add(tt)
             
-            # Apply SLA logic manually for demo purpose to simulate state
-            # (In real app, we'd call service, but here we want to force states like breached)
-            
-            # Simple SLA attached
             sla_t = TicketSLA(
                 ticket_id=t.id,
                 workspace_id=ws.id,
@@ -140,7 +200,6 @@ def seed_demo():
                 first_response_met=(status != TicketStatus.NEW),
                 resolution_met=(status in [TicketStatus.RESOLVED, TicketStatus.CLOSED])
             )
-            # Adjust breached flags if needed based on delta
             now = datetime.now(timezone.utc)
             if sla_t.first_response_due_at < now and not sla_t.first_response_met:
                 sla_t.first_response_breached = True
@@ -152,32 +211,14 @@ def seed_demo():
             
             return t
 
-        # Scenario 1: Fresh New Tickets (High Urgency)
-        create_ticket_scenario("VPN Down for entire office", TicketStatus.NEW, TicketPriority.URGENT, customers[0], created_delta_mins=5, tags=["VPN", "Network", "Urgent"])
-        create_ticket_scenario("Cannot access Email", TicketStatus.NEW, TicketPriority.HIGH, customers[1], created_delta_mins=30, tags=["Email"])
-        
-        # Scenario 2: Active Tickets (Assigned)
-        t_active = create_ticket_scenario("Printer Jammed", TicketStatus.OPEN, TicketPriority.MEDIUM, customers[2], assignee=agent1, created_delta_mins=120, tags=["Hardware", "Printer"])
-        # Add message
-        msg = TicketMessage(ticket_id=t_active.id, workspace_id=ws.id, author_user_id=agent1.id, body="Have you tried restarting it?", created_at=datetime.now(timezone.utc) - timedelta(minutes=60))
-        db.add(msg)
-        
-        # Scenario 3: Breached Ticket (Escalated)
-        t_breached = create_ticket_scenario("Data Export Failed", TicketStatus.OPEN, TicketPriority.URGENT, customers[3], assignee=agent2, created_delta_mins=600, tags=["Software"]) 
-        # Manually force breach state in standard flow logic above would catch it (600 mins > 60 and 480)
-        
-        # Scenario 4: Resolved/Closed
-        create_ticket_scenario("Request for New Mouse", TicketStatus.CLOSED, TicketPriority.LOW, customers[4], assignee=agent1, created_delta_mins=2000, tags=["Hardware"])
-        
-        # Fill rest with random
-        statuses = list(TicketStatus)
-        priorities = list(TicketPriority)
-        for i in range(20):
-            cust = random.choice(customers)
-            stat = random.choice(statuses)
-            agent = random.choice([agent1, agent2, None]) if stat != TicketStatus.NEW else None
-            delta = random.randint(10, 10000)
-            create_ticket_scenario(f"Random Issue {i}", stat, random.choice(priorities), cust, assignee=agent, created_delta_mins=delta)
+        # Realistic ticket scenarios
+        create_ticket_scenario("VPN not connecting from home office", TicketStatus.NEW, TicketPriority.URGENT, customers[0], created_delta_mins=15, tags=["VPN", "Network"])
+        create_ticket_scenario("Cannot access company email on mobile", TicketStatus.OPEN, TicketPriority.HIGH, customers[1], assignee=agent1, created_delta_mins=120, tags=["Email"])
+        create_ticket_scenario("Laptop keyboard not working", TicketStatus.PENDING, TicketPriority.MEDIUM, customers[2], assignee=agent2, created_delta_mins=240, tags=["Hardware"])
+        create_ticket_scenario("Need software license for Adobe Creative", TicketStatus.OPEN, TicketPriority.LOW, customers[3], assignee=agent1, created_delta_mins=480, tags=["Software"])
+        create_ticket_scenario("Printer not printing in color", TicketStatus.RESOLVED, TicketPriority.LOW, customers[4], assignee=agent2, created_delta_mins=1440, tags=["Printer", "Hardware"])
+        create_ticket_scenario("Network drive very slow", TicketStatus.OPEN, TicketPriority.MEDIUM, customers[0], assignee=agent1, created_delta_mins=180, tags=["Network"])
+        create_ticket_scenario("Password reset needed", TicketStatus.CLOSED, TicketPriority.HIGH, customers[1], assignee=agent2, created_delta_mins=2880, tags=["Security", "Access"])
 
         db.commit()
         print("Seeding Complete!")

@@ -3,12 +3,8 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { api } from "@/lib/api";
 import { useAuthStore } from "@/lib/auth";
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useNavigate, Link } from "react-router-dom";
 import { useState } from "react";
-import { Headphones } from "lucide-react";
 
 const loginSchema = z.object({
     email: z.string().email("Please enter a valid email"),
@@ -17,17 +13,12 @@ const loginSchema = z.object({
 
 type LoginFormData = z.infer<typeof loginSchema>;
 
-// Debug helper (dev only)
-const DEBUG_AUTH = import.meta.env.DEV;
-function debugLog(label: string, data?: unknown) {
-    if (DEBUG_AUTH) console.debug(`[auth] ${label}`, data ?? "");
-}
-
 export function LoginPage() {
     const navigate = useNavigate();
     const setAuth = useAuthStore((state) => state.setAuth);
     const [error, setError] = useState("");
     const [isLoading, setIsLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false);
 
     const form = useForm<LoginFormData>({
         resolver: zodResolver(loginSchema),
@@ -35,7 +26,6 @@ export function LoginPage() {
     });
 
     const onSubmit = async (data: LoginFormData) => {
-        debugLog("login request", { email: data.email });
         setIsLoading(true);
         setError("");
 
@@ -44,48 +34,31 @@ export function LoginPage() {
                 email: data.email,
                 password: data.password,
             });
-            debugLog("login response status", loginRes.status);
 
             const token = loginRes.data?.data?.access_token;
-            if (!token) {
-                throw new Error("No access_token in response");
-            }
-            debugLog("token received", token.substring(0, 20) + "...");
+            if (!token) throw new Error("No access_token in response");
 
             const meRes = await api.get("/auth/me", {
                 headers: { Authorization: `Bearer ${token}` },
             });
-            debugLog("me response", meRes.data);
 
             const userData = meRes.data?.data?.user;
-            if (!userData) {
-                throw new Error("No user data in /auth/me response");
-            }
-            debugLog("user", { role: userData.role, email: userData.email });
+            if (!userData) throw new Error("No user data in /auth/me response");
 
             setAuth(token, userData);
 
             const role = userData.role?.toLowerCase();
             if (role === "admin" || role === "agent") {
-                debugLog("redirecting to /agent/inbox");
                 navigate("/agent/inbox", { replace: true });
             } else {
-                debugLog("redirecting to /portal/tickets");
                 navigate("/portal/tickets", { replace: true });
             }
         } catch (err: any) {
-            debugLog("login error", err);
             const apiError = err.response?.data?.error?.message;
-            const statusCode = err.response?.status;
-
-            if (statusCode === 401 || statusCode === 400) {
-                setError("Invalid email or password");
-            } else if (apiError) {
+            if (apiError) {
                 setError(apiError);
-            } else if (err.message) {
-                setError(err.message);
             } else {
-                setError("Login failed. Please try again.");
+                setError("Login failed. Please check your credentials.");
             }
         } finally {
             setIsLoading(false);
@@ -93,115 +66,152 @@ export function LoginPage() {
     };
 
     return (
-        <div
-            className="flex items-center justify-center min-h-screen"
-            style={{
-                background: 'linear-gradient(135deg, var(--dark-tertiary) 0%, var(--dark-primary) 100%)'
-            }}
-        >
-            <Card
-                className="w-full max-w-md border-0"
-                style={{
-                    boxShadow: 'var(--shadow-lg)',
-                    borderRadius: 'var(--radius-lg)',
-                    background: 'var(--bg-glass)',
-                    backdropFilter: 'blur(8px)'
-                }}
-            >
-                <CardHeader className="space-y-1 pb-4">
-                    <div className="flex justify-center mb-4">
-                        <div
-                            className="h-14 w-14 rounded-xl flex items-center justify-center"
-                            style={{
-                                background: 'var(--primary-green)',
-                                boxShadow: 'var(--shadow-md)'
-                            }}
-                        >
-                            <Headphones className="h-7 w-7" style={{ color: 'var(--dark-primary)' }} />
-                        </div>
+        <div className="min-h-screen flex flex-col bg-background font-sans">
+            {/* Decorative side bars */}
+            <div className="fixed top-0 left-0 w-1.5 h-full bg-primary/20 hidden lg:block" />
+            <div className="fixed top-0 right-0 w-1.5 h-full bg-primary/20 hidden lg:block" />
+
+            {/* Main content */}
+            <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
+                {/* Logo */}
+                <div className="mb-10 flex items-center gap-2">
+                    <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+                        <span className="material-symbols-outlined text-foreground text-xl font-bold">bolt</span>
                     </div>
-                    <CardTitle className="text-2xl text-center font-bold">Welcome Back</CardTitle>
-                    <p className="text-center text-sm" style={{ color: 'var(--text-muted)' }}>
-                        Sign in to your Helpdesk account
-                    </p>
-                </CardHeader>
-                <CardContent>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Email</label>
-                            <Input
+                    <span className="text-xl font-bold tracking-tight text-foreground uppercase">HelpDesk</span>
+                </div>
+
+                {/* Login Card */}
+                <div className="w-full max-w-[440px] bg-card border border-border rounded-xl p-8 md:p-10">
+                    {/* Headline */}
+                    <div className="mb-8">
+                        <h1 className="text-foreground text-2xl font-bold tracking-tight">Sign in</h1>
+                        <p className="text-muted-foreground text-sm mt-2">
+                            Enter your credentials to access your workspace.
+                        </p>
+                    </div>
+
+                    {/* Form */}
+                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                        {/* Email Field */}
+                        <div className="flex flex-col gap-1.5">
+                            <label className="text-[13px] font-semibold text-foreground ml-1">
+                                Email Address
+                            </label>
+                            <input
                                 {...form.register("email")}
                                 type="email"
-                                placeholder="admin@acme.com"
+                                placeholder="name@company.com"
                                 autoComplete="email"
                                 disabled={isLoading}
-                                style={{ borderRadius: 'var(--radius-sm)' }}
+                                className="w-full h-12 px-4 rounded-lg border border-border bg-background text-foreground text-sm focus:border-primary focus:ring-0 focus:outline-none focus-primary transition-all placeholder:text-muted-foreground"
                             />
                             {form.formState.errors.email && (
-                                <p className="text-destructive text-xs">{form.formState.errors.email.message}</p>
-                            )}
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Password</label>
-                            <Input
-                                {...form.register("password")}
-                                type="password"
-                                autoComplete="current-password"
-                                disabled={isLoading}
-                                style={{ borderRadius: 'var(--radius-sm)' }}
-                            />
-                            {form.formState.errors.password && (
-                                <p className="text-destructive text-xs">{form.formState.errors.password.message}</p>
+                                <p className="text-xs text-destructive ml-1">
+                                    {form.formState.errors.email.message}
+                                </p>
                             )}
                         </div>
 
+                        {/* Password Field */}
+                        <div className="flex flex-col gap-1.5">
+                            <div className="flex justify-between items-center ml-1">
+                                <label className="text-[13px] font-semibold text-foreground">Password</label>
+                                <a className="text-[12px] font-medium text-muted-foreground hover:text-foreground transition-colors underline decoration-border underline-offset-4" href="#">
+                                    Forgot?
+                                </a>
+                            </div>
+                            <div className="relative group">
+                                <input
+                                    {...form.register("password")}
+                                    type={showPassword ? "text" : "password"}
+                                    placeholder="••••••••"
+                                    autoComplete="current-password"
+                                    disabled={isLoading}
+                                    className="w-full h-12 px-4 pr-12 rounded-lg border border-border bg-background text-foreground text-sm focus:border-primary focus:ring-0 focus:outline-none focus-primary transition-all placeholder:text-muted-foreground"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => setShowPassword(!showPassword)}
+                                    className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                                >
+                                    <span className="material-symbols-outlined text-[20px]">
+                                        {showPassword ? "visibility_off" : "visibility"}
+                                    </span>
+                                </button>
+                            </div>
+                            {form.formState.errors.password && (
+                                <p className="text-xs text-destructive ml-1">
+                                    {form.formState.errors.password.message}
+                                </p>
+                            )}
+                        </div>
+
+                        {/* Error message */}
                         {error && (
-                            <div
-                                className="text-sm p-3 rounded-md text-center"
-                                style={{
-                                    background: 'rgba(239, 68, 68, 0.1)',
-                                    border: '1px solid rgba(239, 68, 68, 0.3)',
-                                    color: '#dc2626',
-                                    borderRadius: 'var(--radius-sm)'
-                                }}
-                            >
+                            <div className="rounded-lg border border-destructive/20 bg-destructive/10 p-3 text-center text-sm text-destructive">
                                 {error}
                             </div>
                         )}
 
-                        <Button
+                        {/* Sign In Button */}
+                        <button
                             type="submit"
-                            className="w-full font-semibold py-2.5 transition-all"
                             disabled={isLoading}
-                            style={{
-                                background: 'var(--primary-green)',
-                                color: 'var(--dark-primary)',
-                                borderRadius: 'var(--radius-md)',
-                                boxShadow: isLoading ? 'none' : 'var(--shadow-sm)'
-                            }}
+                            className="w-full h-12 bg-primary hover:brightness-95 text-primary-foreground font-bold rounded-lg transition-all flex items-center justify-center gap-2 mt-2 shadow-sm disabled:opacity-50"
                         >
-                            {isLoading ? (
-                                <span className="flex items-center gap-2">
-                                    <svg className="animate-spin h-4 w-4" viewBox="0 0 24 24">
-                                        <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                                        <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                                    </svg>
-                                    Signing in...
-                                </span>
-                            ) : "Sign In"}
-                        </Button>
-
-                        <div className="text-center text-xs mt-4 pt-4 border-t" style={{ color: 'var(--text-muted)' }}>
-                            <p className="mb-2">Demo Credentials:</p>
-                            <div className="space-y-1">
-                                <code className="block px-2 py-1 rounded text-xs" style={{ background: 'var(--bg-overlay-light)' }}>
-                                    admin@acme.com / password123
-                                </code>
-                            </div>
-                        </div>
+                            {isLoading ? "Signing in..." : "Sign in"}
+                            {!isLoading && <span className="material-symbols-outlined text-[18px]">arrow_forward</span>}
+                        </button>
                     </form>
-                </CardContent>
-            </Card>
+
+                    {/* Divider */}
+                    <div className="relative my-8">
+                        <div className="absolute inset-0 flex items-center">
+                            <div className="w-full border-t border-border" />
+                        </div>
+                        <div className="relative flex justify-center text-[11px] uppercase tracking-widest font-bold">
+                            <span className="bg-card px-3 text-muted-foreground">or continue with</span>
+                        </div>
+                    </div>
+
+                    {/* SSO Buttons */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <button className="flex items-center justify-center gap-2 h-11 border border-border rounded-lg text-sm font-medium text-foreground hover:bg-muted transition-colors">
+                            <svg className="w-4 h-4" viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" />
+                                <path fill="currentColor" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" />
+                                <path fill="currentColor" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" />
+                                <path fill="currentColor" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" />
+                            </svg>
+                            Google
+                        </button>
+                        <button className="flex items-center justify-center gap-2 h-11 border border-border rounded-lg text-sm font-medium text-foreground hover:bg-muted transition-colors">
+                            <span className="material-symbols-outlined text-[18px]">key</span>
+                            SSO
+                        </button>
+                    </div>
+
+                    {/* Create account link */}
+                    <div className="mt-8 text-center">
+                        <p className="text-sm text-muted-foreground">
+                            Don't have an account?
+                            <a className="text-foreground font-bold hover:underline underline-offset-4 ml-1" href="#">
+                                Create one
+                            </a>
+                        </p>
+                    </div>
+                </div>
+
+                {/* External Footer Links */}
+                <div className="mt-8 flex items-center gap-6 text-[12px] text-muted-foreground font-medium">
+                    <Link to="/terms" className="hover:text-foreground transition-colors">Terms of Service</Link>
+                    <div className="w-1 h-1 rounded-full bg-border" />
+                    <Link to="/privacy" className="hover:text-foreground transition-colors">Privacy Policy</Link>
+                    <div className="w-1 h-1 rounded-full bg-border" />
+                    <Link to="/contact" className="hover:text-foreground transition-colors">Contact Support</Link>
+                </div>
+            </div>
         </div>
     );
 }

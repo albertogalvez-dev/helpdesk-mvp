@@ -3,8 +3,11 @@ import { useForm } from "react-hook-form";
 import { api } from "@/lib/api";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Breadcrumbs } from "@/components/Breadcrumbs";
+import { PageHeader } from "@/components/PageHeader";
 import { useAuthStore } from "@/lib/auth";
-import { Building2, Shield, Save } from "lucide-react";
+import { Shield, Save } from "lucide-react";
 
 interface WorkspaceData {
     id: string;
@@ -31,7 +34,7 @@ export function AdminWorkspacePage() {
         },
     });
 
-    const { register, handleSubmit, formState: { isDirty } } = useForm();
+    const { register, handleSubmit } = useForm();
 
     const updateMutation = useMutation({
         mutationFn: async (data: any) => {
@@ -45,101 +48,106 @@ export function AdminWorkspacePage() {
     if (user?.role?.toLowerCase() !== "admin") {
         return (
             <div className="p-6">
-                <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex items-center gap-3">
-                    <Shield className="h-5 w-5 text-red-500" />
-                    <span className="text-red-700">Admin access required.</span>
+                <div className="flex items-center gap-3 rounded-lg border border-destructive/20 bg-destructive/10 p-4 text-destructive">
+                    <Shield className="h-5 w-5" />
+                    <span>Admin access required.</span>
                 </div>
             </div>
         );
     }
 
     if (isLoading) {
-        return <div className="p-6">Loading workspace...</div>;
+        return <div className="p-6 text-muted-foreground">Loading workspace...</div>;
     }
 
     return (
-        <div className="p-6 space-y-6 max-w-2xl">
-            <div className="flex items-center gap-3">
-                <Building2 className="h-6 w-6 text-primary" />
-                <h1 className="text-2xl font-bold">Workspace Settings</h1>
-            </div>
+        <div className="max-w-2xl space-y-6 p-6">
+            <PageHeader
+                title="Workspace Settings"
+                subtitle="Configure your company profile and support settings."
+                breadcrumbs={
+                    <Breadcrumbs
+                        items={[
+                            { label: "Agent", href: "/agent/inbox" },
+                            { label: "Admin", href: "/agent/admin/workspace" },
+                            { label: "Workspace" },
+                        ]}
+                    />
+                }
+            />
 
-            <div className="bg-white border rounded-lg shadow-sm p-6">
-                <div className="mb-6">
-                    <h2 className="text-lg font-semibold mb-1">{workspace?.name}</h2>
-                    <p className="text-sm text-gray-500">Configure your company profile and support settings.</p>
-                </div>
+            <Card>
+                <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">{workspace?.name}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <form onSubmit={handleSubmit((data) => updateMutation.mutate(data))} className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-foreground">Company Name</label>
+                                <Input
+                                    {...register("company_name")}
+                                    defaultValue={workspace?.profile?.company_name || ""}
+                                    placeholder="ACME Corporation"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-foreground">Contact Email</label>
+                                <Input
+                                    {...register("contact_email")}
+                                    defaultValue={workspace?.profile?.contact_email || ""}
+                                    placeholder="support@company.com"
+                                />
+                            </div>
+                        </div>
 
-                <form onSubmit={handleSubmit((data) => updateMutation.mutate(data))} className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4">
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-foreground">Contact Phone</label>
+                                <Input
+                                    {...register("contact_phone")}
+                                    defaultValue={workspace?.profile?.contact_phone || ""}
+                                    placeholder="+1 555 123 4567"
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <label className="text-sm font-medium text-foreground">Support Hours</label>
+                                <Input
+                                    {...register("support_hours")}
+                                    defaultValue={workspace?.profile?.support_hours || ""}
+                                    placeholder="Mon-Fri 9AM-5PM"
+                                />
+                            </div>
+                        </div>
+
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Company Name</label>
+                            <label className="text-sm font-medium text-foreground">Remote Support Tool</label>
                             <Input
-                                {...register("company_name")}
-                                defaultValue={workspace?.profile?.company_name || ""}
-                                placeholder="ACME Corporation"
+                                {...register("remote_support_tool")}
+                                defaultValue={workspace?.profile?.remote_support_tool || ""}
+                                placeholder="AnyDesk, TeamViewer, etc."
                             />
                         </div>
+
                         <div className="space-y-2">
-                            <label className="text-sm font-medium">Contact Email</label>
-                            <Input
-                                {...register("contact_email")}
-                                defaultValue={workspace?.profile?.contact_email || ""}
-                                placeholder="support@company.com"
+                            <label className="text-sm font-medium text-foreground">Remote Support Instructions</label>
+                            <textarea
+                                {...register("remote_support_instructions")}
+                                defaultValue={workspace?.profile?.remote_support_instructions || ""}
+                                className="min-h-[100px] w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                                placeholder="Instructions for customers on how to prepare for remote support..."
                             />
                         </div>
-                    </div>
 
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Contact Phone</label>
-                            <Input
-                                {...register("contact_phone")}
-                                defaultValue={workspace?.profile?.contact_phone || ""}
-                                placeholder="+1 555 123 4567"
-                            />
+                        <div className="flex justify-end border-t border-border pt-4">
+                            <Button type="submit" disabled={updateMutation.isPending}>
+                                <Save className="mr-2 h-4 w-4" />
+                                {updateMutation.isPending ? "Saving..." : "Save Changes"}
+                            </Button>
                         </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Support Hours</label>
-                            <Input
-                                {...register("support_hours")}
-                                defaultValue={workspace?.profile?.support_hours || ""}
-                                placeholder="Mon-Fri 9AM-5PM"
-                            />
-                        </div>
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium">Remote Support Tool</label>
-                        <Input
-                            {...register("remote_support_tool")}
-                            defaultValue={workspace?.profile?.remote_support_tool || ""}
-                            placeholder="AnyDesk, TeamViewer, etc."
-                        />
-                    </div>
-
-                    <div className="space-y-2">
-                        <label className="text-sm font-medium">Remote Support Instructions</label>
-                        <textarea
-                            {...register("remote_support_instructions")}
-                            defaultValue={workspace?.profile?.remote_support_instructions || ""}
-                            className="w-full min-h-[100px] px-3 py-2 border rounded-md text-sm"
-                            placeholder="Instructions for customers on how to prepare for remote support..."
-                        />
-                    </div>
-
-                    <div className="pt-4 border-t flex justify-end">
-                        <Button
-                            type="submit"
-                            className="bg-primary hover:bg-primary/90 text-primary-foreground"
-                            disabled={updateMutation.isPending}
-                        >
-                            <Save className="h-4 w-4 mr-2" />
-                            {updateMutation.isPending ? "Saving..." : "Save Changes"}
-                        </Button>
-                    </div>
-                </form>
-            </div>
+                    </form>
+                </CardContent>
+            </Card>
         </div>
     );
 }
