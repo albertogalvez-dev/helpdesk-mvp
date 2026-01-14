@@ -1,0 +1,98 @@
+[
+  {
+    "url": "http://localhost:5173/",
+    "route": "/",
+    "filename": "home.png",
+    "viewport": "1280x720",
+    "timestamp": "2026-01-14T16:43:16.172Z",
+    "category": "public"
+  },
+  {
+    "url": "http://localhost:5173/login",
+    "route": "/login",
+    "filename": "login.png",
+    "viewport": "1280x720",
+    "timestamp": "2026-01-14T16:43:18.349Z",
+    "category": "public"
+  },
+  {
+    "url": "http://localhost:5173/privacy",
+    "route": "/privacy",
+    "filename": "privacy.png",
+    "viewport": "1280x720",
+    "timestamp": "2026-01-14T16:43:20.574Z",
+    "category": "public"
+  },
+  {
+    "url": "http://localhost:5173/terms",
+    "route": "/terms",
+    "filename": "terms.png",
+    "viewport": "1280x720",
+    "timestamp": "2026-01-14T16:43:22.720Z",
+    "category": "public"
+  },
+  {
+    "url": "http://localhost:5173/contact",
+    "route": "/contact",
+    "filename": "contact.png",
+    "viewport": "1280x720",
+    "timestamp": "2026-01-14T16:43:24.919Z",
+    "category": "public"
+  },
+  {
+    "url": "http://localhost:18000/docs",
+    "route": "/docs",
+    "filename": "docs.png",
+    "viewport": "1280x720",
+    "timestamp": "2026-01-14T16:43:28.122Z",
+    "category": "api"
+  },
+  {
+    "url": "http://localhost:18000/redoc",
+    "route": "/redoc",
+    "filename": "redoc.png",
+    "viewport": "1280x720",
+    "timestamp": "2026-01-14T16:43:32.867Z",
+    "category": "api"
+  },
+  {
+    "url": "http://localhost:5173/agent/inbox",
+    "route": "/agent/inbox",
+    "filename": "agent-inbox.png",
+    "viewport": "1280x720",
+    "timestamp": "2026-01-14T16:43:36.124Z",
+    "category": "agent"
+  },
+  {
+    "url": "http://localhost:5173/agent/reports",
+    "route": "/agent/reports",
+    "filename": "agent-reports.png",
+    "viewport": "1280x720",
+    "timestamp": "2026-01-14T16:43:38.351Z",
+    "category": "agent"
+  },
+  {
+    "url": "http://localhost:5173/agent/admin/slas",
+    "route": "/agent/admin/slas",
+    "filename": "agent-admin-slas.png",
+    "viewport": "1280x720",
+    "timestamp": "2026-01-14T16:43:40.546Z",
+    "category": "admin"
+  },
+  {
+    "url": "http://localhost:5173/agent/admin/users",
+    "route": "/agent/admin/users",
+    "filename": "agent-admin-users.png",
+    "viewport": "1280x720",
+    "timestamp": "2026-01-14T16:43:42.738Z",
+    "category": "admin"
+  },
+  {
+    "url": "http://localhost:5173/agent/admin/workspace",
+    "route": "/agent/admin/workspace",
+    "filename": "agent-admin-workspace.png",
+    "viewport": "1280x720",
+    "timestamp": "2026-01-14T16:43:44.934Z",
+    "category": "admin"
+  }
+]
